@@ -6,8 +6,11 @@ use App\Models\Member;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
+use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithStyles;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class MembersExport implements FromCollection, WithHeadings, WithMapping
+class MembersExport implements FromCollection, WithHeadings, WithMapping, ShouldAutoSize, WithStyles
 {
     public function collection()
     {
@@ -18,13 +21,13 @@ class MembersExport implements FromCollection, WithHeadings, WithMapping
     {
         return [
             'NIS',
-            'Nama Lengkap',
-            'Kelas',
+            'NAMA LENGKAP',
+            'KELAS',
             'L/P',
-            'Alamat',
-            'Nama Orang Tua',
-            'No. HP Orang Tua',
-            'Status',
+            'ALAMAT',
+            'NAMA ORANG TUA',
+            'NO. HP ORANG TUA',
+            'STATUS',
         ];
     }
 
@@ -39,6 +42,19 @@ class MembersExport implements FromCollection, WithHeadings, WithMapping
             $member->parent_name,
             $member->parent_phone,
             $member->status,
+        ];
+    }
+
+    public function styles(Worksheet $sheet)
+    {
+        return [
+            1 => [
+                'font' => ['bold' => true, 'color' => ['rgb' => '0F172A']],
+                'fill' => [
+                    'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                    'startColor' => ['rgb' => 'F1F5F9']
+                ]
+            ],
         ];
     }
 }

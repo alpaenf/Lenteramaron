@@ -23,7 +23,7 @@ class GuestBookNotification extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: '🔔 Notifikasi Kunjungan Baru Buku Tamu Perpustakaan - ' . $this->guestBook->name,
+            subject: 'Notifikasi Kunjungan Baru Buku Tamu Perpustakaan - ' . $this->guestBook->name,
         );
     }
 

@@ -6,8 +6,11 @@ use App\Models\Book;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
+use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithStyles;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class BooksExport implements FromCollection, WithHeadings, WithMapping
+class BooksExport implements FromCollection, WithHeadings, WithMapping, ShouldAutoSize, WithStyles
 {
     public function collection()
     {
@@ -17,15 +20,15 @@ class BooksExport implements FromCollection, WithHeadings, WithMapping
     public function headings(): array
     {
         return [
-            'Kode Buku',
+            'KODE BUKU',
             'ISBN',
-            'Judul Buku',
-            'Pengarang',
-            'Penerbit',
-            'Tahun',
-            'Kategori',
-            'Rak',
-            'Stok',
+            'JUDUL BUKU',
+            'PENGARANG',
+            'PENERBIT',
+            'TAHUN',
+            'KATEGORI',
+            'RAK',
+            'STOK',
         ];
     }
 
@@ -41,6 +44,19 @@ class BooksExport implements FromCollection, WithHeadings, WithMapping
             $book->category?->name ?? '-',
             $book->shelf,
             $book->stock,
+        ];
+    }
+
+    public function styles(Worksheet $sheet)
+    {
+        return [
+            1 => [
+                'font' => ['bold' => true, 'color' => ['rgb' => '0F172A']],
+                'fill' => [
+                    'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                    'startColor' => ['rgb' => 'F1F5F9']
+                ]
+            ],
         ];
     }
 }

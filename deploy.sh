@@ -10,19 +10,19 @@ PROJECT_FOLDER="Lenteramaron"
 PUBLIC_HTML_PATH="../public_html"
 
 echo "========================================"
-echo "🚀 Memulai Deployment Lenteramaron"
+echo "[INFO] Memulai Deployment Lenteramaron"
 echo "========================================"
 
 # 1. Git Pull
-echo "📥 1. Mengambil update terbaru dari Git..."
+echo "[1/5] Mengambil update terbaru dari Git..."
 git pull origin main
 
 if [ $? -ne 0 ]; then
-    echo "❌ Gagal melakukan git pull. Cek koneksi atau konflik. (Lanjut proses...)"
+    echo "[ERROR] Gagal melakukan git pull. Cek koneksi atau konflik. (Lanjut proses...)"
 fi
 
 # 1.2 Build frontend assets (public/build tidak disimpan di git)
-echo "🛠️  1.2. Build aset frontend (Vite)..."
+echo "[1.2] Build aset frontend (Vite)..."
 if command -v npm >/dev/null 2>&1; then
     if [ -f package-lock.json ]; then
         npm ci --no-audit --no-fund || npm install --no-audit --no-fund
@@ -31,31 +31,31 @@ if command -v npm >/dev/null 2>&1; then
     fi
     npm run build
     if [ $? -ne 0 ]; then
-        echo "❌ Build frontend gagal. Proses deploy dihentikan."
+        echo "[ERROR] Build frontend gagal. Proses deploy dihentikan."
         exit 1
     fi
 else
     if [ -f "public/build/manifest.json" ]; then
-        echo "⚠️  npm tidak ditemukan. Lewati build server dan gunakan aset public/build yang sudah ada dari git."
+        echo "[WARN] npm tidak ditemukan. Lewati build server dan gunakan aset public/build yang sudah ada dari git."
     else
-        echo "❌ npm tidak ditemukan dan public/build/manifest.json tidak ada."
-        echo "   Solusi: build di lokal/CI lalu commit folder public/build."
+        echo "[ERROR] npm tidak ditemukan dan public/build/manifest.json tidak ada."
+        echo "        Solusi: build di lokal/CI lalu commit folder public/build."
         exit 1
     fi
 fi
 
 # 1.5 Check .env configuration
-echo "🔧 1.5. Memeriksa konfigurasi .env..."
+echo "[1.5] Memeriksa konfigurasi .env..."
 if ! grep -q "SESSION_SECURE_COOKIE=true" .env 2>/dev/null; then
-    echo "⚠️  Warning: SESSION_SECURE_COOKIE belum di-set ke true di .env"
-    echo "   Pastikan update .env dengan konfigurasi yang tepat untuk production."
+    echo "[WARN] SESSION_SECURE_COOKIE belum di-set ke true di .env"
+    echo "       Pastikan update .env dengan konfigurasi yang tepat untuk production."
 fi
 
 # Hapus file hot jika ada agar Laravel tidak mencari localhost Vite port 5173
 rm -f public/hot "$PUBLIC_HTML_PATH/hot"
 
 # 2. Pindahkan isi folder public ke public_html
-echo "📂 2. Menyalin aset dari folder public ke $PUBLIC_HTML_PATH..."
+echo "[2/5] Menyalin aset dari folder public ke $PUBLIC_HTML_PATH..."
 # Buat folder jika belum ada (opsional, jaga-jaga)
 mkdir -p "$PUBLIC_HTML_PATH"
 # Menyalin semua isi folder public ke public_html
@@ -63,7 +63,7 @@ cp -r public/* "$PUBLIC_HTML_PATH/"
 rm -f "$PUBLIC_HTML_PATH/hot"
 
 # Salin atau Buat .htaccess standard Laravel
-echo "📝 Menyalin/Membuat .htaccess di public_html pengarah route..."
+echo "[2.1] Menyalin/Membuat .htaccess di public_html pengarah route..."
 cat > "$PUBLIC_HTML_PATH/.htaccess" << 'EOF'
 <IfModule mod_rewrite.c>
     <IfModule mod_negotiation.c>
@@ -89,7 +89,7 @@ cat > "$PUBLIC_HTML_PATH/.htaccess" << 'EOF'
 EOF
 
 # 3. Update index.php
-echo "📝 3. Memperbarui index.php di public_html..."
+echo "[3/5] Memperbarui index.php di public_html..."
 cat > "$PUBLIC_HTML_PATH/index.php" << EOL
 <?php
 
@@ -114,7 +114,7 @@ require __DIR__.'/../$PROJECT_FOLDER/vendor/autoload.php';
 EOL
 
 # 4. Fix Storage Symlink
-echo "🔗 4. Memperbaiki Symbolic Link Storage..."
+echo "[4/5] Memperbaiki Symbolic Link Storage..."
 # Hapus link/folder storage lama di public_html untuk memastikan bersih
 rm -rf "$PUBLIC_HTML_PATH/storage"
 
@@ -124,15 +124,15 @@ rm -rf "$PUBLIC_HTML_PATH/storage"
 ln -s "../$PROJECT_FOLDER/storage/app/public" "$PUBLIC_HTML_PATH/storage"
 
 # Fix File & Directory Permissions for Storage (Prevent 403 Forbidden)
-echo "🔒 Memberikan izin akses folder storage (755) dan file (644)..."
+echo "[4.1] Memberikan izin akses folder storage (755) dan file (644)..."
 chmod -R 755 storage/app/public
 find storage/app/public -type d -exec chmod 755 {} + 2>/dev/null
 find storage/app/public -type f -exec chmod 644 {} + 2>/dev/null
 
 # 5. Clear & Optimize Laravel caches
-echo "🧹 5. Membersihkan cache Laravel..."
+echo "[5/5] Membersihkan cache Laravel..."
 php artisan optimize:clear
 
 echo "========================================"
-echo "✅ Deployment Lenteramaron Selesai!"
+echo "[SUCCESS] Deployment Lenteramaron Selesai!"
 echo "========================================"
