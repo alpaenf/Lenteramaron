@@ -18,12 +18,12 @@ class LandingController extends Controller
 {
     public function index(Request $request): Response
     {
-        $search = $request->input('search');
+        $search = trim((string) $request->input('search', ''));
         $categoryId = $request->input('category_id');
 
         $booksQuery = Book::with('category');
 
-        if ($search) {
+        if ($search !== '') {
             $booksQuery->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
                   ->orWhere('author', 'like', "%{$search}%")
@@ -31,7 +31,7 @@ class LandingController extends Controller
             });
         }
 
-        if ($categoryId) {
+        if (!empty($categoryId)) {
             $booksQuery->where('category_id', $categoryId);
         }
 

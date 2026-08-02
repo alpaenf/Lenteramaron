@@ -36,10 +36,21 @@ const search = ref(props.filters.search || '');
 const categoryId = ref(props.filters.category_id || '');
 
 const filterBooks = () => {
-    router.get('/', {
-        search: search.value,
-        category_id: categoryId.value,
-    }, { preserveState: true, preserveScroll: true, replace: true });
+    const query = {};
+    if (search.value && search.value.trim() !== '') {
+        query.search = search.value.trim();
+    }
+    if (categoryId.value && categoryId.value !== '') {
+        query.category_id = categoryId.value;
+    }
+
+    router.get('/', query, { preserveState: true, preserveScroll: true, replace: true });
+};
+
+const resetFilter = () => {
+    search.value = '';
+    categoryId.value = '';
+    filterBooks();
 };
 
 const guestForm = useForm({
@@ -500,9 +511,17 @@ const getFallbackUrl = (category) => {
                     </div>
                 </div>
 
-                <div v-else class="bg-[#f4f8fc] rounded-3xl p-12 text-center text-slate-500 border border-slate-100">
+                <div v-else class="bg-[#f4f8fc] rounded-3xl p-12 text-center text-slate-500 border border-slate-100 my-4">
                     <BookOpen class="w-12 h-12 text-slate-300 mx-auto mb-3" />
-                    <p class="font-bold text-base text-slate-700">Tidak ada buku yang sesuai dengan pencarian Anda.</p>
+                    <p class="font-bold text-base text-slate-700">Tidak ada buku yang sesuai dengan pencarian / kategori Anda.</p>
+                    <p class="text-xs text-slate-400 mt-1">Coba kata kunci lain atau tampilkan kembali semua buku.</p>
+                    <button 
+                        @click="resetFilter" 
+                        class="mt-4 inline-flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer"
+                    >
+                        <RotateCcw class="w-3.5 h-3.5 text-white" />
+                        Tampilkan Semua Buku
+                    </button>
                 </div>
             </div>
         </section>
