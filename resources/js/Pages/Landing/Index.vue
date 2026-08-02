@@ -647,7 +647,7 @@ const getFallbackUrl = (category) => {
                                 </div>
                                 <div>
                                     <div class="font-extrabold text-sm text-slate-900">Alamat Lengkap</div>
-                                    <div class="text-slate-600 text-xs mt-0.5 font-medium">{{ settings.school_address || 'Jl. Raya Maron No. 02, Kec. Maron, Kab. Probolinggo' }}</div>
+                                    <div class="text-slate-600 text-xs mt-0.5 font-medium">{{ settings.school_address || 'Desa Maron, Kec. Garung, Kab. Wonosobo, Jawa Tengah' }}</div>
                                 </div>
                             </div>
                             <div class="flex items-start gap-4 p-4 rounded-2xl bg-[#f4f8fc] border border-slate-100 shadow-xs hover:shadow-md transition-all duration-300">
@@ -672,7 +672,7 @@ const getFallbackUrl = (category) => {
                         <div class="pt-2">
                             <div class="w-full h-64 rounded-3xl border-4 border-white shadow-xl overflow-hidden relative">
                                 <iframe 
-                                    :src="settings.gmaps_embed_url || 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15809.123456789!2d113.3150000!3d-7.8500000!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2dd70123456789%3A0x123456789!2sSD%20Negeri%2002%20Maron!5e0!3m2!1sid!2sid!4v1700000000000'"
+                                    :src="settings.gmaps_embed_url || 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3957.6751394476323!2d109.92206757357137!3d-7.277756071516778!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e700b18b719df35%3A0x753393990615190a!2sSD%20N%202%20MARON!5e0!3m2!1sid!2sid!4v1785695520988!5m2!1sid!2sid'"
                                     class="w-full h-full border-0"
                                     allowfullscreen="" 
                                     loading="lazy" 

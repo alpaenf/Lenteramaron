@@ -42,10 +42,10 @@
 </head>
 <body>
     <div class="kop">
-        <h2>PEMERINTAH KABUPATEN PROBOLINGGO • DINAS PENDIDIKAN</h2>
-        <h1>SD NEGERI 02 MARON</h1>
+        <h2>PEMERINTAH KABUPATEN WONOSOBO • DINAS PENDIDIKAN</h2>
+        <h1>SD NEGERI 2 MARON</h1>
         <p class="sub">PERPUSTAKAAN "LENTERA MARON"</p>
-        <p class="address">Jl. Raya Maron No. 45, Kec. Maron, Kab. Probolinggo | Email: sdn02maron@gmail.com</p>
+        <p class="address">Desa Maron, Kec. Garung, Kab. Wonosobo, Jawa Tengah | Email: sdn02maron@gmail.com</p>
     </div>
 
     <div class="line-double"></div>
