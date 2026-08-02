@@ -6,7 +6,7 @@ import {
     Search, BookOpen, PenTool, BookMarked, Users, ArrowRightLeft, 
     RotateCcw, ClipboardList, BarChart3, ArrowRight, Sun, Sparkles, 
     MessageSquare, School, Landmark, Star, Lightbulb, Flag, MapPin, 
-    Phone, Mail, FileText, Send, CheckCircle, ChevronDown, Filter
+    Phone, Mail, FileText, Send, CheckCircle, ChevronDown, Filter, ExternalLink
 } from 'lucide-vue-next';
 
 const props = defineProps({
@@ -670,7 +670,7 @@ const getFallbackUrl = (category) => {
                             </div>
                         </div>
                         <div class="pt-2">
-                            <div class="w-full h-64 rounded-3xl border-4 border-white shadow-xl overflow-hidden relative">
+                            <div class="w-full h-64 rounded-3xl border-4 border-white shadow-xl overflow-hidden relative group">
                                 <iframe 
                                     :src="settings.gmaps_embed_url || 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3957.6751394476323!2d109.92206757357137!3d-7.277756071516778!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e700b18b719df35%3A0x753393990615190a!2sSD%20N%202%20MARON!5e0!3m2!1sid!2sid!4v1785695520988!5m2!1sid!2sid'"
                                     class="w-full h-full border-0"
@@ -678,6 +678,15 @@ const getFallbackUrl = (category) => {
                                     loading="lazy" 
                                     referrerpolicy="no-referrer-when-downgrade">
                                 </iframe>
+                                <a 
+                                    :href="settings.gmaps_url || 'https://maps.app.goo.gl/AvLEeA6feNjgzVZVA'" 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    class="absolute top-3 left-3 inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white/90 backdrop-blur-md border border-slate-200/80 text-slate-800 text-xs font-extrabold shadow-lg hover:bg-white hover:text-blue-600 transition-all duration-200">
+                                    <MapPin class="w-3.5 h-3.5 text-red-500 shrink-0" />
+                                    <span>Buka di Google Maps</span>
+                                    <ExternalLink class="w-3 h-3 text-slate-400 shrink-0 ml-0.5" />
+                                </a>
                             </div>
                         </div>
                     </div>
