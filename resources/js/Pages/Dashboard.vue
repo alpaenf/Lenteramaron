@@ -2,7 +2,7 @@
 import { ref, computed } from 'vue';
 import { Link } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { BookOpen, Users, UserCheck, BookMarked, TrendingUp, CheckCircle, Clock } from 'lucide-vue-next';
+import { BookOpen, Users, UserCheck, BookMarked, TrendingUp, CheckCircle, Clock, ChevronDown } from 'lucide-vue-next';
 import { Line } from 'vue-chartjs';
 import { 
     Chart as ChartJS, 
@@ -39,7 +39,7 @@ const filteredActivities = computed(() => {
     return props.recent_borrowings;
 });
 
-// Line Chart Configuration (Daily / Monthly Trends)
+// Line Chart Configuration (Daily / Monthly / Yearly Trends)
 const lineChartData = computed(() => {
     let source = props.charts?.daily_7 || props.charts?.monthly || { labels: [], borrowings: [], returns: [] };
     
@@ -49,6 +49,8 @@ const lineChartData = computed(() => {
         source = props.charts.daily_30;
     } else if (chartPeriod.value === 'monthly' && props.charts?.monthly) {
         source = props.charts.monthly;
+    } else if (chartPeriod.value === 'yearly' && props.charts?.yearly) {
+        source = props.charts.yearly;
     }
 
     return {
@@ -194,11 +196,20 @@ const getInitials = (name) => {
                             <h3 class="text-lg font-extrabold text-on-surface tracking-tight">Tren Sirkulasi &amp; Pengunjung</h3>
                             <p class="text-xs text-on-surface-variant">Statistik peminjaman dan pengembalian perpustakaan</p>
                         </div>
-                        <select v-model="chartPeriod" class="bg-surface-container-low border border-outline-variant/40 rounded-xl text-xs px-3 py-2 font-bold text-on-surface focus:outline-none focus:border-primary cursor-pointer">
-                            <option value="daily_7">Harian (7 Hari Terakhir)</option>
-                            <option value="daily_30">Harian (30 Hari Terakhir)</option>
-                            <option value="monthly">Bulanan (6 Bulan Terakhir)</option>
-                        </select>
+                        <div class="relative inline-block">
+                            <select 
+                                v-model="chartPeriod" 
+                                class="appearance-none bg-surface-container-low hover:bg-surface-container border border-outline-variant/60 rounded-xl text-xs font-bold text-on-surface pl-3.5 pr-9 py-2 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary cursor-pointer transition-all shadow-2xs"
+                            >
+                                <option value="daily_7" class="bg-surface py-1 text-on-surface">📅 Harian (7 Hari Terakhir)</option>
+                                <option value="daily_30" class="bg-surface py-1 text-on-surface">📅 Harian (30 Hari Terakhir)</option>
+                                <option value="monthly" class="bg-surface py-1 text-on-surface">📆 Bulanan (6 Bulan Terakhir)</option>
+                                <option value="yearly" class="bg-surface py-1 text-on-surface">📊 Tahunan (3 Tahun Terakhir)</option>
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-on-surface-variant">
+                                <ChevronDown class="w-3.5 h-3.5" />
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Line Chart Canvas -->

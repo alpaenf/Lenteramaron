@@ -77,6 +77,19 @@ class DashboardController extends Controller
             $returnChartData[] = $returnCount;
         }
 
+        // Yearly borrowing & returning trends for 3 years
+        $yearlyYears = [];
+        $yearlyBorrowData = [];
+        $yearlyReturnData = [];
+
+        for ($i = 2; $i >= 0; $i--) {
+            $year = Carbon::now()->subYears($i)->year;
+            $yearlyYears[] = "Tahun {$year}";
+
+            $yearlyBorrowData[] = Borrowing::whereYear('borrow_date', $year)->count();
+            $yearlyReturnData[] = ReturnBook::whereYear('return_date', $year)->count();
+        }
+
         // Category distribution (Pie Chart)
         $categoryLabels = [];
         $categoryData = [];
@@ -119,6 +132,11 @@ class DashboardController extends Controller
                     'labels' => $months,
                     'borrowings' => $borrowChartData,
                     'returns' => $returnChartData,
+                ],
+                'yearly' => [
+                    'labels' => $yearlyYears,
+                    'borrowings' => $yearlyBorrowData,
+                    'returns' => $yearlyReturnData,
                 ],
                 'categories' => [
                     'labels' => $categoryLabels,
