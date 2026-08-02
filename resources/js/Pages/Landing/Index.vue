@@ -6,7 +6,7 @@ import {
     Search, BookOpen, PenTool, BookMarked, Users, ArrowRightLeft, 
     RotateCcw, ClipboardList, BarChart3, ArrowRight, Sun, Sparkles, 
     MessageSquare, School, Landmark, Star, Lightbulb, Flag, MapPin, 
-    Phone, Mail, FileText, Send, CheckCircle 
+    Phone, Mail, FileText, Send, CheckCircle, ChevronDown, Filter
 } from 'lucide-vue-next';
 
 const props = defineProps({
@@ -39,7 +39,7 @@ const filterBooks = () => {
     router.get('/', {
         search: search.value,
         category_id: categoryId.value,
-    }, { preserveState: true, replace: true });
+    }, { preserveState: true, preserveScroll: true, replace: true });
 };
 
 const guestForm = useForm({
@@ -451,14 +451,22 @@ const getFallbackUrl = (category) => {
                             />
                             <Search class="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
                         </div>
-                        <select 
-                            v-model="categoryId" 
-                            @change="filterBooks"
-                            class="py-3 px-4 rounded-2xl border border-slate-200 bg-[#f4f8fc] text-xs font-bold text-slate-700 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 outline-none transition-all"
-                        >
-                            <option value="">Semua Kategori</option>
-                            <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.code }} - {{ cat.name }}</option>
-                        </select>
+                        <div class="relative inline-flex items-center w-full sm:w-auto">
+                            <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
+                                <Filter class="w-4 h-4" />
+                            </div>
+                            <select 
+                                v-model="categoryId" 
+                                @change="filterBooks"
+                                class="w-full appearance-none py-3 pl-10 pr-9 rounded-2xl border border-slate-200 bg-[#f4f8fc] text-xs font-bold text-slate-700 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 outline-none cursor-pointer transition-all shadow-2xs"
+                            >
+                                <option value="" class="bg-white py-1">Semua Kategori</option>
+                                <option v-for="cat in categories" :key="cat.id" :value="cat.id" class="bg-white py-1">{{ cat.code }} - {{ cat.name }}</option>
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400">
+                                <ChevronDown class="w-4 h-4" />
+                            </div>
+                        </div>
                     </div>
                 </div>
 
