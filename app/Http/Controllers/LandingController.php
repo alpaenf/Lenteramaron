@@ -47,16 +47,34 @@ class LandingController extends Controller
         $categories = BookCategory::all();
         $galleries = Gallery::latest()->get();
         
+        $gmapsEmbedUrl = Setting::getByKey('gmaps_embed_url');
+        if (!$gmapsEmbedUrl || str_contains($gmapsEmbedUrl, '113.315') || str_contains($gmapsEmbedUrl, '0x2dd70123456789')) {
+            $gmapsEmbedUrl = 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3957.6751394476323!2d109.92206757357137!3d-7.277756071516778!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e700b18b719df35%3A0x753393990615190a!2sSD%20N%202%20MARON!5e0!3m2!1sid!2sid!4v1785695520988!5m2!1sid!2sid';
+            Setting::setByKey('gmaps_embed_url', $gmapsEmbedUrl);
+        }
+
+        $gmapsUrl = Setting::getByKey('gmaps_url');
+        if (!$gmapsUrl || str_contains($gmapsUrl, 'Probolinggo')) {
+            $gmapsUrl = 'https://maps.app.goo.gl/AvLEeA6feNjgzVZVA';
+            Setting::setByKey('gmaps_url', $gmapsUrl);
+        }
+
+        $schoolAddress = Setting::getByKey('school_address');
+        if (!$schoolAddress || str_contains($schoolAddress, 'Probolinggo')) {
+            $schoolAddress = 'Desa Maron, Kec. Garung, Kab. Wonosobo, Jawa Tengah 56353';
+            Setting::setByKey('school_address', $schoolAddress);
+        }
+
         $settings = [
             'school_name' => Setting::getByKey('school_name', 'SD Negeri 02 Maron'),
             'library_name' => Setting::getByKey('library_name', 'LENTERA MARON'),
-            'school_address' => Setting::getByKey('school_address', 'Desa Maron, Kec. Garung, Kab. Wonosobo, Jawa Tengah'),
+            'school_address' => $schoolAddress,
             'school_email' => Setting::getByKey('school_email', 'sdn02maron@gmail.com'),
             'school_phone' => Setting::getByKey('school_phone', '0812-3456-7890'),
             'vision' => Setting::getByKey('vision'),
             'mission' => Setting::getByKey('mission'),
-            'gmaps_embed_url' => Setting::getByKey('gmaps_embed_url', 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3957.6751394476323!2d109.92206757357137!3d-7.277756071516778!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e700b18b719df35%3A0x753393990615190a!2sSD%20N%202%20MARON!5e0!3m2!1sid!2sid!4v1785695520988!5m2!1sid!2sid'),
-            'gmaps_url' => Setting::getByKey('gmaps_url', 'https://maps.app.goo.gl/AvLEeA6feNjgzVZVA'),
+            'gmaps_embed_url' => $gmapsEmbedUrl,
+            'gmaps_url' => $gmapsUrl,
             'spreadsheet_url' => Setting::getByKey('spreadsheet_url'),
             'hero_banner_path' => Setting::getByKey('hero_banner_path'),
             'profile_photo_1' => Setting::getByKey('profile_photo_1'),

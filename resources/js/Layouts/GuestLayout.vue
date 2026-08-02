@@ -88,7 +88,7 @@ const mobileMenuOpen = ref(false);
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
                     <div class="md:col-span-2 space-y-4">
                         <div class="mb-2">
-                            <img src="/images/logo.png" alt="Lentera Maron Logo" class="h-10 w-auto object-contain bg-white/90 p-1.5 rounded-xl shadow-md inline-block" />
+                            <img src="/images/logo.png" alt="Lentera Maron Logo" class="h-12 w-auto object-contain inline-block" />
                         </div>
                         <p class="max-w-md text-outline-variant text-sm leading-relaxed">
                             Perpustakaan resmi SD Negeri 02 Maron. Berkomitmen menyediakan akses literasi yang inklusif, modern, dan menginspirasi bagi seluruh siswa-siswi.
