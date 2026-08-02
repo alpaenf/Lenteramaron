@@ -29,6 +29,32 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
+        // Daily borrowing & returning trends for last 7 days
+        $daily7Days = [];
+        $daily7BorrowData = [];
+        $daily7ReturnData = [];
+
+        for ($i = 6; $i >= 0; $i--) {
+            $date = Carbon::now()->subDays($i);
+            $daily7Days[] = $date->translatedFormat('d M');
+
+            $daily7BorrowData[] = Borrowing::whereDate('borrow_date', $date->toDateString())->count();
+            $daily7ReturnData[] = ReturnBook::whereDate('return_date', $date->toDateString())->count();
+        }
+
+        // Daily borrowing & returning trends for last 30 days
+        $daily30Days = [];
+        $daily30BorrowData = [];
+        $daily30ReturnData = [];
+
+        for ($i = 29; $i >= 0; $i--) {
+            $date = Carbon::now()->subDays($i);
+            $daily30Days[] = $date->translatedFormat('d M');
+
+            $daily30BorrowData[] = Borrowing::whereDate('borrow_date', $date->toDateString())->count();
+            $daily30ReturnData[] = ReturnBook::whereDate('return_date', $date->toDateString())->count();
+        }
+
         // Monthly borrowing & returning trends for 6 months
         $months = [];
         $borrowChartData = [];
@@ -79,6 +105,16 @@ class DashboardController extends Controller
             ],
             'popular_books' => $popularBooks,
             'charts' => [
+                'daily_7' => [
+                    'labels' => $daily7Days,
+                    'borrowings' => $daily7BorrowData,
+                    'returns' => $daily7ReturnData,
+                ],
+                'daily_30' => [
+                    'labels' => $daily30Days,
+                    'borrowings' => $daily30BorrowData,
+                    'returns' => $daily30ReturnData,
+                ],
                 'monthly' => [
                     'labels' => $months,
                     'borrowings' => $borrowChartData,

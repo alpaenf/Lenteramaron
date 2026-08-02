@@ -25,7 +25,7 @@ const props = defineProps({
 });
 
 const activityFilter = ref('Semua');
-const selectedYear = ref('2026');
+const chartPeriod = ref('daily_7');
 
 // Filtered Recent Borrowings
 const filteredActivities = computed(() => {
@@ -39,32 +39,44 @@ const filteredActivities = computed(() => {
     return props.recent_borrowings;
 });
 
-// Line Chart Configuration (Monthly Trends)
-const lineChartData = computed(() => ({
-    labels: props.charts.monthly.labels,
-    datasets: [
-        {
-            label: 'Peminjaman Buku',
-            borderColor: '#005da7',
-            backgroundColor: 'rgba(0, 93, 167, 0.12)',
-            data: props.charts.monthly.borrowings,
-            tension: 0.35,
-            fill: true,
-            pointBackgroundColor: '#005da7',
-            pointRadius: 4,
-        },
-        {
-            label: 'Pengembalian Buku',
-            borderColor: '#006d36',
-            backgroundColor: 'rgba(0, 109, 54, 0.12)',
-            data: props.charts.monthly.returns,
-            tension: 0.35,
-            fill: true,
-            pointBackgroundColor: '#006d36',
-            pointRadius: 4,
-        }
-    ]
-}));
+// Line Chart Configuration (Daily / Monthly Trends)
+const lineChartData = computed(() => {
+    let source = props.charts?.daily_7 || props.charts?.monthly || { labels: [], borrowings: [], returns: [] };
+    
+    if (chartPeriod.value === 'daily_7' && props.charts?.daily_7) {
+        source = props.charts.daily_7;
+    } else if (chartPeriod.value === 'daily_30' && props.charts?.daily_30) {
+        source = props.charts.daily_30;
+    } else if (chartPeriod.value === 'monthly' && props.charts?.monthly) {
+        source = props.charts.monthly;
+    }
+
+    return {
+        labels: source.labels,
+        datasets: [
+            {
+                label: 'Peminjaman Buku',
+                borderColor: '#005da7',
+                backgroundColor: 'rgba(0, 93, 167, 0.12)',
+                data: source.borrowings,
+                tension: 0.35,
+                fill: true,
+                pointBackgroundColor: '#005da7',
+                pointRadius: 4,
+            },
+            {
+                label: 'Pengembalian Buku',
+                borderColor: '#006d36',
+                backgroundColor: 'rgba(0, 109, 54, 0.12)',
+                data: source.returns,
+                tension: 0.35,
+                fill: true,
+                pointBackgroundColor: '#006d36',
+                pointRadius: 4,
+            }
+        ]
+    };
+});
 
 const lineChartOptions = {
     responsive: true,
@@ -180,11 +192,12 @@ const getInitials = (name) => {
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                         <div>
                             <h3 class="text-lg font-extrabold text-on-surface tracking-tight">Tren Sirkulasi &amp; Pengunjung</h3>
-                            <p class="text-xs text-on-surface-variant">Statistik peminjaman dan pengembalian perpustakaan tahun {{ selectedYear }}</p>
+                            <p class="text-xs text-on-surface-variant">Statistik peminjaman dan pengembalian perpustakaan</p>
                         </div>
-                        <select v-model="selectedYear" class="bg-surface-container-low border border-outline-variant/40 rounded-xl text-xs px-3 py-2 font-bold text-on-surface focus:outline-none focus:border-primary cursor-pointer">
-                            <option value="2026">Tahun 2026</option>
-                            <option value="2025">Tahun 2025</option>
+                        <select v-model="chartPeriod" class="bg-surface-container-low border border-outline-variant/40 rounded-xl text-xs px-3 py-2 font-bold text-on-surface focus:outline-none focus:border-primary cursor-pointer">
+                            <option value="daily_7">Harian (7 Hari Terakhir)</option>
+                            <option value="daily_30">Harian (30 Hari Terakhir)</option>
+                            <option value="monthly">Bulanan (6 Bulan Terakhir)</option>
                         </select>
                     </div>
 

@@ -123,6 +123,12 @@ rm -rf "$PUBLIC_HTML_PATH/storage"
 # Ke:   ../Lenteramaron/storage/app/public
 ln -s "../$PROJECT_FOLDER/storage/app/public" "$PUBLIC_HTML_PATH/storage"
 
+# Fix File & Directory Permissions for Storage (Prevent 403 Forbidden)
+echo "🔒 Memberikan izin akses folder storage (755) dan file (644)..."
+chmod -R 755 storage/app/public
+find storage/app/public -type d -exec chmod 755 {} + 2>/dev/null
+find storage/app/public -type f -exec chmod 644 {} + 2>/dev/null
+
 # 5. Clear & Optimize Laravel caches
 echo "🧹 5. Membersihkan cache Laravel..."
 php artisan optimize:clear
