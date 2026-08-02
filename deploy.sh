@@ -51,12 +51,16 @@ if ! grep -q "SESSION_SECURE_COOKIE=true" .env 2>/dev/null; then
     echo "   Pastikan update .env dengan konfigurasi yang tepat untuk production."
 fi
 
+# Hapus file hot jika ada agar Laravel tidak mencari localhost Vite port 5173
+rm -f public/hot "$PUBLIC_HTML_PATH/hot"
+
 # 2. Pindahkan isi folder public ke public_html
 echo "📂 2. Menyalin aset dari folder public ke $PUBLIC_HTML_PATH..."
 # Buat folder jika belum ada (opsional, jaga-jaga)
 mkdir -p "$PUBLIC_HTML_PATH"
 # Menyalin semua isi folder public ke public_html
 cp -r public/* "$PUBLIC_HTML_PATH/"
+rm -f "$PUBLIC_HTML_PATH/hot"
 
 # Salin atau Buat .htaccess standard Laravel
 echo "📝 Menyalin/Membuat .htaccess di public_html pengarah route..."
