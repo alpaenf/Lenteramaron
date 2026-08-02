@@ -78,6 +78,21 @@ const deleteGuest = (guest) => {
 const printGuestBook = () => {
     window.print();
 };
+
+const formatDate = (dateStr) => {
+    if (!dateStr) return '-';
+    const cleanStr = String(dateStr).split('T')[0];
+    const parts = cleanStr.split('-');
+    if (parts.length === 3) {
+        const [year, month, day] = parts;
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agt', 'Sep', 'Okt', 'Nov', 'Des'];
+        const mIdx = parseInt(month, 10) - 1;
+        if (mIdx >= 0 && mIdx < 12) {
+            return `${day} ${months[mIdx]} ${year}`;
+        }
+    }
+    return dateStr;
+};
 </script>
 
 <template>
@@ -145,7 +160,7 @@ const printGuestBook = () => {
                                     <span>"{{ g.feedback || '-' }}"</span>
                                 </td>
                                 <td class="p-4 text-slate-600">
-                                    <span>{{ g.date }}</span>
+                                    <span class="font-bold text-slate-900">{{ formatDate(g.date) }}</span>
                                     <span class="block text-[10px] text-slate-400">Jam {{ g.time }}</span>
                                 </td>
                                 <td class="p-4 text-right print:hidden">

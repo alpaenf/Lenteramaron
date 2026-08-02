@@ -76,6 +76,21 @@ const submitCreate = () => {
         },
     });
 };
+
+const formatDate = (dateStr) => {
+    if (!dateStr) return '-';
+    const cleanStr = String(dateStr).split('T')[0];
+    const parts = cleanStr.split('-');
+    if (parts.length === 3) {
+        const [year, month, day] = parts;
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agt', 'Sep', 'Okt', 'Nov', 'Des'];
+        const mIdx = parseInt(month, 10) - 1;
+        if (mIdx >= 0 && mIdx < 12) {
+            return `${day} ${months[mIdx]} ${year}`;
+        }
+    }
+    return dateStr;
+};
 </script>
 
 <template>
@@ -131,7 +146,7 @@ const submitCreate = () => {
                                     <span class="font-bold text-slate-900 block truncate">{{ r.book?.title }}</span>
                                     <span class="text-[10px] text-slate-400 block">Kode: {{ r.book?.book_code }}</span>
                                 </td>
-                                <td class="p-4 font-medium text-slate-700">{{ r.return_date }}</td>
+                                <td class="p-4 font-medium text-slate-700">{{ formatDate(r.return_date) }}</td>
                                 <td class="p-4">
                                     <span :class="[
                                         r.condition === 'Baik' ? 'bg-emerald-50 text-emerald-700' :

@@ -24,6 +24,21 @@ const filterReport = () => {
 const downloadPdf = () => {
     window.open(`/reports/export-pdf?start_date=${startDate.value}&end_date=${endDate.value}&type=${type.value}`, '_blank');
 };
+
+const formatDate = (dateStr) => {
+    if (!dateStr) return '-';
+    const cleanStr = String(dateStr).split('T')[0];
+    const parts = cleanStr.split('-');
+    if (parts.length === 3) {
+        const [year, month, day] = parts;
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agt', 'Sep', 'Okt', 'Nov', 'Des'];
+        const mIdx = parseInt(month, 10) - 1;
+        if (mIdx >= 0 && mIdx < 12) {
+            return `${day} ${months[mIdx]} ${year}`;
+        }
+    }
+    return dateStr;
+};
 </script>
 
 <template>
@@ -95,8 +110,8 @@ const downloadPdf = () => {
                                 <td class="p-3 font-mono font-bold text-blue-900">{{ item.transaction_no }}</td>
                                 <td class="p-3 font-bold text-slate-900">{{ item.member?.name }} ({{ item.member?.class_name }})</td>
                                 <td class="p-3 text-slate-800">{{ item.book?.title }}</td>
-                                <td class="p-3">{{ item.borrow_date }}</td>
-                                <td class="p-3 text-amber-700 font-bold">{{ item.due_date }}</td>
+                                <td class="p-3 font-medium text-slate-700">{{ formatDate(item.borrow_date) }}</td>
+                                <td class="p-3 text-amber-700 font-bold">{{ formatDate(item.due_date) }}</td>
                                 <td class="p-3"><span class="px-2 py-0.5 bg-blue-50 text-blue-700 rounded-full font-bold text-[10px]">{{ item.status }}</span></td>
                             </tr>
                         </tbody>
@@ -119,7 +134,7 @@ const downloadPdf = () => {
                                 <td class="p-3 font-mono font-bold text-emerald-900">{{ item.return_no }}</td>
                                 <td class="p-3 font-bold text-slate-900">{{ item.member?.name }}</td>
                                 <td class="p-3 text-slate-800">{{ item.book?.title }}</td>
-                                <td class="p-3">{{ item.return_date }}</td>
+                                <td class="p-3 font-medium text-slate-700">{{ formatDate(item.return_date) }}</td>
                                 <td class="p-3 font-bold text-emerald-700">{{ item.condition }}</td>
                                 <td class="p-3">{{ item.late_days }} hari</td>
                             </tr>
@@ -143,7 +158,7 @@ const downloadPdf = () => {
                                 <td class="p-3 font-bold text-slate-900">{{ item.name }}</td>
                                 <td class="p-3">{{ item.institution }}</td>
                                 <td class="p-3">{{ item.purpose }}</td>
-                                <td class="p-3">{{ item.date }} {{ item.time }}</td>
+                                <td class="p-3 font-medium text-slate-700">{{ formatDate(item.date) }} <span class="text-[10px] text-slate-400">Jam {{ item.time }}</span></td>
                             </tr>
                         </tbody>
                     </table>

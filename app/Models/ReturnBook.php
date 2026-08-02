@@ -28,6 +28,11 @@ class ReturnBook extends Model
         'late_days' => 'integer',
     ];
 
+    protected function serializeDate(\DateTimeInterface $date): string
+    {
+        return $date->format('Y-m-d');
+    }
+
     public function borrowing(): BelongsTo
     {
         return $this->belongsTo(Borrowing::class, 'borrowing_id');

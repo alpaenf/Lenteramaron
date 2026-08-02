@@ -28,6 +28,11 @@ class Borrowing extends Model
         'return_date' => 'date',
     ];
 
+    protected function serializeDate(\DateTimeInterface $date): string
+    {
+        return $date->format('Y-m-d');
+    }
+
     public function member(): BelongsTo
     {
         return $this->belongsTo(Member::class, 'member_id');

@@ -107,6 +107,21 @@ const deleteBorrowing = (borrowing) => {
         router.delete(`/borrowings/${borrowing.id}`);
     }
 };
+
+const formatDate = (dateStr) => {
+    if (!dateStr) return '-';
+    const cleanStr = String(dateStr).split('T')[0];
+    const parts = cleanStr.split('-');
+    if (parts.length === 3) {
+        const [year, month, day] = parts;
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agt', 'Sep', 'Okt', 'Nov', 'Des'];
+        const mIdx = parseInt(month, 10) - 1;
+        if (mIdx >= 0 && mIdx < 12) {
+            return `${day} ${months[mIdx]} ${year}`;
+        }
+    }
+    return dateStr;
+};
 </script>
 
 <template>
@@ -171,8 +186,8 @@ const deleteBorrowing = (borrowing) => {
                                     <span class="text-[10px] text-slate-400 block">Kode: {{ b.book?.book_code }} | Rak: {{ b.book?.shelf }}</span>
                                 </td>
                                 <td class="p-4 text-slate-600">
-                                    <span class="flex items-center gap-1.5"><Calendar class="w-3.5 h-3.5 text-slate-400 shrink-0" /> Pinjam: {{ b.borrow_date }}</span>
-                                    <span class="flex items-center gap-1.5 text-[10px] text-amber-600 font-bold mt-0.5"><Clock class="w-3 h-3 text-amber-600 shrink-0" /> Harus Kembali: {{ b.due_date }}</span>
+                                    <span class="flex items-center gap-1.5 font-medium"><Calendar class="w-3.5 h-3.5 text-slate-400 shrink-0" /> Pinjam: {{ formatDate(b.borrow_date) }}</span>
+                                    <span class="flex items-center gap-1.5 text-[10px] text-amber-600 font-bold mt-0.5"><Clock class="w-3 h-3 text-amber-600 shrink-0" /> Harus Kembali: {{ formatDate(b.due_date) }}</span>
                                 </td>
                                 <td class="p-4">
                                     <span :class="[
