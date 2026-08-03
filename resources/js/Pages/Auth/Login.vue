@@ -41,9 +41,7 @@ const submit = () => {
             <!-- Left Side: Illustration & Branding -->
             <section class="hidden md:flex md:w-1/2 bg-surface-container-low relative flex-col items-center justify-center p-8 lg:p-10 overflow-hidden border-r border-outline-variant/30">
                 <div class="relative z-10 text-center flex flex-col items-center">
-                    <h1 class="text-2xl lg:text-3xl font-extrabold text-primary mb-2 leading-tight tracking-tight">
-                        Lentera Maron <br/> SDN 02 Maron
-                    </h1>
+                    <img src="/images/logo.png" alt="Lentera Maron Logo" class="h-12 w-auto object-contain mb-4" />
 
                     <p class="text-on-surface-variant text-xs lg:text-sm max-w-xs mb-6 leading-relaxed">
                         Jendela dunia bagi siswa-siswi cerdas masa depan. Mari mulai petualangan membaca hari ini!
@@ -66,13 +64,7 @@ const submit = () => {
             <section class="w-full md:w-1/2 flex flex-col justify-center px-6 py-8 md:px-10 md:py-10 bg-white">
                 <!-- Mobile Header Only -->
                 <div class="flex items-center gap-3 mb-6 md:hidden">
-                    <div class="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
-                        <span class="material-symbols-outlined text-primary text-2xl" style="font-variation-settings: 'FILL' 1;">menu_book</span>
-                    </div>
-                    <div>
-                        <h2 class="text-lg font-bold text-primary">Lentera Maron</h2>
-                        <p class="text-[11px] text-on-surface-variant">SD Negeri 02 Maron</p>
-                    </div>
+                    <img src="/images/logo.png" alt="Lentera Maron Logo" class="h-9 w-auto object-contain" />
                 </div>
 
                 <div class="mb-6 text-left">
