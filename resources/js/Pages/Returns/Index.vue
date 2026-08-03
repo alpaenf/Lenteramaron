@@ -98,26 +98,26 @@ const formatDate = (dateStr) => {
         <div class="space-y-6">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Sirkulasi Pengembalian Buku</h1>
-                    <p class="text-xs text-slate-500 mt-1">Proses pengembalian buku dipinjam, hitung keterlambatan, dan pencatatan kondisi fisik buku.</p>
+                    <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">Sirkulasi Pengembalian Buku</h1>
+                    <p class="text-xs text-slate-500 mt-0.5">Proses pengembalian buku dipinjam, hitung keterlambatan, dan pencatatan kondisi fisik buku.</p>
                 </div>
-                <div class="flex items-center gap-3">
-                    <a href="/returns/export-excel" target="_blank" class="px-4 py-2.5 rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-700 text-xs font-bold transition-all flex items-center gap-2">
-                        <FileSpreadsheet class="w-4 h-4" />
-                        <span>Export Excel</span>
-                    </a>
-                    <button @click="openCreateModal" class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all shadow-md shadow-emerald-500/20 flex items-center gap-2">
+                <div class="grid grid-cols-2 sm:flex sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
+                    <button @click="openCreateModal" class="col-span-2 sm:col-span-1 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all shadow-md shadow-emerald-500/20 flex items-center justify-center gap-2 whitespace-nowrap">
                         <Plus class="w-4 h-4" />
                         <span>Proses Pengembalian</span>
                     </button>
+                    <a href="/returns/export-excel" target="_blank" class="px-3.5 py-2.5 rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 text-xs font-bold transition-all flex items-center justify-center gap-2 whitespace-nowrap">
+                        <FileSpreadsheet class="w-4 h-4" />
+                        <span>Export Excel</span>
+                    </a>
                 </div>
             </div>
 
             <!-- Controls -->
-            <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm">
+            <div class="bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200/80 shadow-xs">
                 <div class="relative w-full sm:w-80">
-                    <input v-model="search" @keyup.enter="filter" type="text" placeholder="Cari No. Return / Anggota / Judul..." class="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-200 text-xs focus:border-blue-500" />
-                    <Search class="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+                    <input v-model="search" @keyup.enter="filter" type="text" placeholder="Cari No. Return / Anggota / Judul..." class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:border-blue-500 focus:outline-none" />
+                    <Search class="w-4 h-4 text-slate-400 absolute left-3 top-3" />
                 </div>
             </div>
 

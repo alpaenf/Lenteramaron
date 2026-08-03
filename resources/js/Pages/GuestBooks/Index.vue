@@ -100,75 +100,75 @@ const formatDate = (dateStr) => {
         <div class="space-y-6">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 print:hidden">
                 <div>
-                    <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Buku Tamu & Pengunjung</h1>
-                    <p class="text-xs text-slate-500 mt-1">Catatan kehadiran siswa, guru, pengawas, dan tamu umum perpustakaan.</p>
+                    <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">Buku Tamu &amp; Pengunjung</h1>
+                    <p class="text-xs text-slate-500 mt-0.5">Catatan kehadiran siswa, guru, pengawas, dan tamu umum perpustakaan.</p>
                 </div>
-                <div class="flex items-center gap-3">
-                    <button @click="printGuestBook" class="px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 text-xs font-bold transition-all flex items-center gap-2">
-                        <Printer class="w-4 h-4" />
-                        <span>Cetak Buku Tamu</span>
+                <div class="grid grid-cols-2 sm:flex sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
+                    <button @click="openCreateModal" class="col-span-2 sm:col-span-1 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-all shadow-md shadow-blue-500/20 flex items-center justify-center gap-2 whitespace-nowrap">
+                        <Plus class="w-4 h-4" />
+                        <span>Catat Kunjungan</span>
                     </button>
-                    <a href="/guest-books/export-excel" target="_blank" class="px-4 py-2.5 rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-700 text-xs font-bold transition-all flex items-center gap-2">
+                    <a href="/guest-books/export-excel" target="_blank" class="px-3.5 py-2.5 rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 text-xs font-bold transition-all flex items-center justify-center gap-2 whitespace-nowrap">
                         <FileSpreadsheet class="w-4 h-4" />
                         <span>Export Excel</span>
                     </a>
-                    <button @click="openCreateModal" class="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-all shadow-md shadow-blue-500/20 flex items-center gap-2">
-                        <Plus class="w-4 h-4" />
-                        <span>Catat Kunjungan</span>
+                    <button @click="printGuestBook" class="px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 text-xs font-bold transition-all flex items-center justify-center gap-2 whitespace-nowrap">
+                        <Printer class="w-4 h-4" />
+                        <span>Cetak</span>
                     </button>
                 </div>
             </div>
 
             <!-- Controls -->
-            <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4 print:hidden">
+            <div class="bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3 print:hidden">
                 <div class="relative w-full sm:w-80">
-                    <input v-model="search" @keyup.enter="filter" type="text" placeholder="Cari Nama / Instansi / Keperluan..." class="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-200 text-xs focus:border-blue-500" />
-                    <Search class="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+                    <input v-model="search" @keyup.enter="filter" type="text" placeholder="Cari Nama / Instansi / Keperluan..." class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:border-blue-500 focus:outline-none" />
+                    <Search class="w-4 h-4 text-slate-400 absolute left-3 top-3" />
                 </div>
-                <div>
-                    <input v-model="date" @change="filter" type="date" class="py-2 px-3 rounded-xl border border-slate-200 text-xs bg-white" />
+                <div class="w-full sm:w-auto">
+                    <input v-model="date" @change="filter" type="date" class="w-full sm:w-auto py-2.5 px-3.5 rounded-xl border border-slate-200 text-xs bg-white focus:outline-none" />
                 </div>
             </div>
 
             <!-- Table -->
-            <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+            <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
                 <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
+                    <table class="w-full text-left border-collapse min-w-[650px] sm:min-w-full">
                         <thead>
                             <tr class="bg-slate-50 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                                <th class="p-4">No. Pengunjung</th>
-                                <th class="p-4">Nama & Instansi</th>
-                                <th class="p-4">Keperluan</th>
-                                <th class="p-4">Kesan / Pesan</th>
-                                <th class="p-4">Tanggal & Jam</th>
-                                <th class="p-4 text-right print:hidden">Aksi</th>
+                                <th class="p-3.5 sm:p-4 whitespace-nowrap">No. Pengunjung</th>
+                                <th class="p-3.5 sm:p-4">Nama &amp; Instansi</th>
+                                <th class="p-3.5 sm:p-4">Keperluan</th>
+                                <th class="p-3.5 sm:p-4">Kesan / Pesan</th>
+                                <th class="p-3.5 sm:p-4 whitespace-nowrap">Tanggal &amp; Jam</th>
+                                <th class="p-3.5 sm:p-4 text-right print:hidden whitespace-nowrap">Aksi</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100 text-xs">
                             <tr v-for="g in guests.data" :key="g.id" class="hover:bg-slate-50/80 transition-colors">
-                                <td class="p-4 font-mono font-bold text-blue-900">{{ g.visitor_no }}</td>
-                                <td class="p-4 font-bold text-slate-900">
+                                <td class="p-3.5 sm:p-4 font-mono font-bold text-blue-900 whitespace-nowrap">{{ g.visitor_no }}</td>
+                                <td class="p-3.5 sm:p-4 font-bold text-slate-900">
                                     <span>{{ g.name }}</span>
-                                    <span class="text-[10px] text-slate-500 block font-normal">{{ g.institution }}</span>
+                                    <span class="text-[10px] text-slate-500 block font-normal mt-0.5">{{ g.institution }}</span>
                                 </td>
-                                <td class="p-4">
-                                    <span class="px-2.5 py-1 rounded-md text-[10px] font-bold bg-blue-50 text-blue-700">
+                                <td class="p-3.5 sm:p-4">
+                                    <span class="inline-block px-2.5 py-1 rounded-lg text-[10px] font-bold bg-blue-50 text-blue-700 leading-normal">
                                         {{ g.purpose }}
                                     </span>
                                 </td>
-                                <td class="p-4 text-slate-600 italic max-w-xs">
+                                <td class="p-3.5 sm:p-4 text-slate-600 italic max-w-xs">
                                     <span>"{{ g.feedback || '-' }}"</span>
                                 </td>
-                                <td class="p-4 text-slate-600">
+                                <td class="p-3.5 sm:p-4 text-slate-600 whitespace-nowrap">
                                     <span class="font-bold text-slate-900">{{ formatDate(g.date) }}</span>
-                                    <span class="block text-[10px] text-slate-400">Jam {{ g.time }}</span>
+                                    <span class="block text-[10px] text-slate-400 mt-0.5">Jam {{ g.time }}</span>
                                 </td>
-                                <td class="p-4 text-right print:hidden">
-                                    <div class="flex items-center justify-end gap-2">
-                                        <button @click="openEditModal(g)" class="p-2 rounded-lg text-blue-600 hover:bg-blue-50">
+                                <td class="p-3.5 sm:p-4 text-right print:hidden whitespace-nowrap">
+                                    <div class="flex items-center justify-end gap-1.5">
+                                        <button @click="openEditModal(g)" class="p-2 rounded-xl text-blue-600 hover:bg-blue-50 transition-colors">
                                             <Edit class="w-4 h-4" />
                                         </button>
-                                        <button @click="deleteGuest(g)" class="p-2 rounded-lg text-rose-600 hover:bg-rose-50">
+                                        <button @click="deleteGuest(g)" class="p-2 rounded-xl text-rose-600 hover:bg-rose-50 transition-colors">
                                             <Trash2 class="w-4 h-4" />
                                         </button>
                                     </div>

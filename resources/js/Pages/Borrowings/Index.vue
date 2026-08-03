@@ -129,29 +129,29 @@ const formatDate = (dateStr) => {
         <div class="space-y-6">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Sirkulasi Peminjaman Buku</h1>
-                    <p class="text-xs text-slate-500 mt-1">Transaksi peminjaman koleksi buku oleh anggota siswa perpustakaan.</p>
+                    <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">Sirkulasi Peminjaman Buku</h1>
+                    <p class="text-xs text-slate-500 mt-0.5">Transaksi peminjaman koleksi buku oleh anggota siswa perpustakaan.</p>
                 </div>
-                <div class="flex items-center gap-3">
-                    <a href="/borrowings/export-excel" target="_blank" class="px-4 py-2.5 rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-700 text-xs font-bold transition-all flex items-center gap-2">
+                <div class="grid grid-cols-2 sm:flex sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
+                    <button @click="openCreateModal" class="col-span-2 sm:col-span-1 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-all shadow-md shadow-blue-500/20 flex items-center justify-center gap-2 whitespace-nowrap">
+                        <Plus class="w-4 h-4" />
+                        <span>Peminjaman Baru</span>
+                    </button>
+                    <a href="/borrowings/export-excel" target="_blank" class="px-3.5 py-2.5 rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 text-xs font-bold transition-all flex items-center justify-center gap-2 whitespace-nowrap">
                         <FileSpreadsheet class="w-4 h-4" />
                         <span>Export Excel</span>
                     </a>
-                    <button @click="openCreateModal" class="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-all shadow-md shadow-blue-500/20 flex items-center gap-2">
-                        <Plus class="w-4 h-4" />
-                        <span>Catat Peminjaman Baru</span>
-                    </button>
                 </div>
             </div>
 
             <!-- Controls -->
-            <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3">
                 <div class="relative w-full sm:w-80">
-                    <input v-model="search" @keyup.enter="filter" type="text" placeholder="Cari No. TRX / Nama / Judul Buku..." class="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-200 text-xs focus:border-blue-500" />
-                    <Search class="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+                    <input v-model="search" @keyup.enter="filter" type="text" placeholder="Cari No. TRX / Nama / Judul Buku..." class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:border-blue-500 focus:outline-none" />
+                    <Search class="w-4 h-4 text-slate-400 absolute left-3 top-3" />
                 </div>
-                <div>
-                    <select v-model="status" @change="filter" class="py-2 px-3 rounded-xl border border-slate-200 text-xs bg-white">
+                <div class="w-full sm:w-auto">
+                    <select v-model="status" @change="filter" class="w-full sm:w-auto py-2.5 px-3.5 rounded-xl border border-slate-200 text-xs bg-white focus:outline-none">
                         <option value="">Semua Status</option>
                         <option value="Dipinjam">Dipinjam</option>
                         <option value="Dikembalikan">Dikembalikan</option>

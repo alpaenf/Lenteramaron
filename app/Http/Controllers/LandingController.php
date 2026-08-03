@@ -40,7 +40,7 @@ class LandingController extends Controller
         $stats = [
             'total_books' => Book::count(),
             'total_members' => Member::where('status', 'Aktif')->count(),
-            'today_visitors' => GuestBook::whereDate('date', now()->toDateString())->count(),
+            'today_visitors' => GuestBook::count(),
             'total_visitors' => GuestBook::count(),
         ];
 

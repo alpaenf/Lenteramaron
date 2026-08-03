@@ -477,7 +477,7 @@ const getFallbackUrl = (category) => {
                     </div>
                     <div class="space-y-2 transform hover:scale-105 transition-transform duration-300">
                         <div class="text-4xl sm:text-5xl font-black tracking-tight">{{ animatedStats.visitors }}+</div>
-                        <div class="text-xs font-extrabold uppercase tracking-widest text-blue-100">Pengunjung Harian</div>
+                        <div class="text-xs font-extrabold uppercase tracking-widest text-blue-100">Total Pengunjung</div>
                     </div>
                 </div>
             </div>
