@@ -24,7 +24,7 @@ const mobileMenuOpen = ref(false);
 
         <!-- Floating Capsule Glassmorphic Header -->
         <header class="fixed top-4 left-4 right-4 z-50 max-w-7xl mx-auto">
-            <nav class="w-full bg-white/80 backdrop-blur-xl border border-white/60 rounded-full shadow-lg shadow-black/5 px-6 py-2.5 transition-all duration-300">
+            <nav :class="[mobileMenuOpen ? 'rounded-3xl p-5' : 'rounded-full px-6 py-2.5', 'w-full bg-white/95 backdrop-blur-xl border border-slate-200/80 shadow-xl shadow-slate-900/5 transition-all duration-300']">
                 <div class="flex justify-between items-center h-11">
                     <!-- Brand Logo -->
                     <Link href="/" class="flex items-center gap-2 hover:opacity-90 transition-opacity">
@@ -53,24 +53,26 @@ const mobileMenuOpen = ref(false);
                     </div>
 
                     <!-- Mobile Menu Toggle -->
-                    <button @click="mobileMenuOpen = !mobileMenuOpen" class="md:hidden p-1.5 text-primary focus:outline-none rounded-full hover:bg-primary/10">
+                    <button @click="mobileMenuOpen = !mobileMenuOpen" class="md:hidden p-2 text-slate-700 hover:text-blue-600 focus:outline-none rounded-xl hover:bg-slate-100 transition-colors">
                         <span class="material-symbols-outlined text-2xl flex items-center justify-center">{{ mobileMenuOpen ? 'close' : 'menu' }}</span>
                     </button>
                 </div>
 
                 <!-- Mobile Menu Dropdown -->
-                <div v-if="mobileMenuOpen" class="md:hidden mt-3 pt-3 border-t border-outline-variant/30 space-y-2 pb-2">
-                    <a @click="mobileMenuOpen = false" href="#profil" class="block text-on-surface-variant hover:text-primary py-1 font-medium text-sm">Profil</a>
-                    <a @click="mobileMenuOpen = false" href="#layanan" class="block text-on-surface-variant hover:text-primary py-1 font-medium text-sm">Layanan</a>
-                    <a @click="mobileMenuOpen = false" href="#katalog" class="block text-on-surface-variant hover:text-primary py-1 font-medium text-sm">Katalog</a>
-                    <a @click="mobileMenuOpen = false" href="#galeri" class="block text-on-surface-variant hover:text-primary py-1 font-medium text-sm">Galeri</a>
-                    <a @click="mobileMenuOpen = false" href="#buku-tamu" class="block text-on-surface-variant hover:text-primary py-1 font-medium text-sm">Buku Tamu</a>
-                    <div class="pt-2">
-                        <Link v-if="page.props.auth?.user" href="/dashboard" class="block w-full text-center bg-primary text-on-primary py-2.5 rounded-full font-bold shadow-md text-sm">
+                <div v-if="mobileMenuOpen" class="md:hidden mt-4 pt-4 border-t border-slate-100 space-y-1">
+                    <a @click="mobileMenuOpen = false" href="#" class="block px-4 py-2.5 rounded-xl text-slate-700 hover:text-blue-600 hover:bg-blue-50 font-bold text-sm transition-colors">Beranda</a>
+                    <a @click="mobileMenuOpen = false" href="#profil" class="block px-4 py-2.5 rounded-xl text-slate-700 hover:text-blue-600 hover:bg-blue-50 font-bold text-sm transition-colors">Profil</a>
+                    <a @click="mobileMenuOpen = false" href="#layanan" class="block px-4 py-2.5 rounded-xl text-slate-700 hover:text-blue-600 hover:bg-blue-50 font-bold text-sm transition-colors">Layanan</a>
+                    <a @click="mobileMenuOpen = false" href="#katalog" class="block px-4 py-2.5 rounded-xl text-slate-700 hover:text-blue-600 hover:bg-blue-50 font-bold text-sm transition-colors">Katalog</a>
+                    <a @click="mobileMenuOpen = false" href="#galeri" class="block px-4 py-2.5 rounded-xl text-slate-700 hover:text-blue-600 hover:bg-blue-50 font-bold text-sm transition-colors">Galeri</a>
+                    <a @click="mobileMenuOpen = false" href="#buku-tamu" class="block px-4 py-2.5 rounded-xl text-slate-700 hover:text-blue-600 hover:bg-blue-50 font-bold text-sm transition-colors">Buku Tamu</a>
+                    <div class="pt-3 border-t border-slate-100 mt-2">
+                        <Link v-if="page.props.auth?.user" href="/dashboard" class="block w-full text-center bg-[#0066cc] hover:bg-[#0052a3] text-white py-3 rounded-2xl font-extrabold shadow-md text-sm transition-all">
                             Dashboard
                         </Link>
-                        <Link v-else href="/login" class="block w-full text-center bg-primary text-on-primary py-2.5 rounded-full font-bold shadow-md text-sm">
-                            Login Staf
+                        <Link v-else href="/login" class="block w-full text-center bg-[#0066cc] hover:bg-[#0052a3] text-white py-3 rounded-2xl font-extrabold shadow-md text-sm transition-all flex items-center justify-center gap-2">
+                            <span>Login Staf</span>
+                            <span class="material-symbols-outlined text-base">person</span>
                         </Link>
                     </div>
                 </div>

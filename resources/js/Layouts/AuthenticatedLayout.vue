@@ -185,7 +185,7 @@ const getGreeting = () => {
                         <div v-if="notificationsOpen" @click="closeNotifications" class="fixed inset-0 z-40"></div>
 
                         <!-- Dropdown Panel -->
-                        <div v-if="notificationsOpen" class="absolute right-0 mt-2.5 w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-slate-200/80 z-50 overflow-hidden transform transition-all duration-200">
+                        <div v-if="notificationsOpen" class="fixed left-4 right-4 top-16 sm:absolute sm:left-auto sm:right-0 sm:top-full sm:mt-2.5 sm:w-96 bg-white rounded-2xl shadow-2xl border border-slate-200/80 z-50 overflow-hidden transform transition-all duration-200">
                             <div class="px-4 py-3 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
                                 <div class="flex items-center gap-2">
                                     <Bell class="w-4 h-4 text-primary" />
