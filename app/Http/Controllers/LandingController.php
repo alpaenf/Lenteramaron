@@ -38,9 +38,9 @@ class LandingController extends Controller
         $books = $booksQuery->latest()->paginate(12)->withQueryString();
 
         $stats = [
-            'total_books' => Book::sum('stock'),
+            'total_books' => Book::count(),
             'total_members' => Member::where('status', 'Aktif')->count(),
-            'total_borrowings' => Borrowing::count(),
+            'today_visitors' => GuestBook::whereDate('date', now()->toDateString())->count(),
             'total_visitors' => GuestBook::count(),
         ];
 

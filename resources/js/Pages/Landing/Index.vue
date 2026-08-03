@@ -18,11 +18,54 @@ const props = defineProps({
     filters: Object,
 });
 
+const animatedStats = ref({
+    books: 0,
+    members: 0,
+    visitors: 0,
+});
+
+let hasAnimatedStats = false;
+
+const startCountUpAnimation = () => {
+    if (hasAnimatedStats) return;
+    hasAnimatedStats = true;
+
+    const targetBooks = Number(props.stats?.total_books || 0);
+    const targetMembers = Number(props.stats?.total_members || 0);
+    const targetVisitors = Number(props.stats?.today_visitors ?? props.stats?.total_visitors ?? 0);
+
+    const duration = 1800; // 1.8 seconds
+    const startTime = performance.now();
+
+    const updateCount = (currentTime) => {
+        const elapsedTime = currentTime - startTime;
+        const progress = Math.min(elapsedTime / duration, 1);
+        const easeOut = 1 - Math.pow(1 - progress, 3);
+
+        animatedStats.value.books = Math.floor(easeOut * targetBooks);
+        animatedStats.value.members = Math.floor(easeOut * targetMembers);
+        animatedStats.value.visitors = Math.floor(easeOut * targetVisitors);
+
+        if (progress < 1) {
+            requestAnimationFrame(updateCount);
+        } else {
+            animatedStats.value.books = targetBooks;
+            animatedStats.value.members = targetMembers;
+            animatedStats.value.visitors = targetVisitors;
+        }
+    };
+
+    requestAnimationFrame(updateCount);
+};
+
 onMounted(() => {
     const observer = new IntersectionObserver((entries) => {
         entries.forEach((entry) => {
             if (entry.isIntersecting) {
                 entry.target.classList.add('animate-reveal-active');
+                if (entry.target.id === 'stats-section') {
+                    startCountUpAnimation();
+                }
             }
         });
     }, { threshold: 0.1 });
@@ -30,6 +73,14 @@ onMounted(() => {
     document.querySelectorAll('.reveal-on-scroll').forEach((el) => {
         observer.observe(el);
     });
+
+    const statsEl = document.getElementById('stats-section');
+    if (statsEl) {
+        const rect = statsEl.getBoundingClientRect();
+        if (rect.top < window.innerHeight) {
+            startCountUpAnimation();
+        }
+    }
 });
 
 const search = ref(props.filters.search || '');
@@ -413,19 +464,19 @@ const getFallbackUrl = (category) => {
         </section>
 
         <!-- Statistik -->
-        <section class="py-16 bg-[#0066cc] text-white relative overflow-hidden reveal-on-scroll">
+        <section id="stats-section" class="py-16 bg-[#0066cc] text-white relative overflow-hidden reveal-on-scroll">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-12 text-center">
                     <div class="space-y-2 transform hover:scale-105 transition-transform duration-300">
-                        <div class="text-4xl sm:text-5xl font-black tracking-tight">{{ stats.total_books ? (stats.total_books + '+') : '5240+' }}</div>
+                        <div class="text-4xl sm:text-5xl font-black tracking-tight">{{ animatedStats.books }}+</div>
                         <div class="text-xs font-extrabold uppercase tracking-widest text-blue-100">Koleksi Buku</div>
                     </div>
                     <div class="space-y-2 transform hover:scale-105 transition-transform duration-300">
-                        <div class="text-4xl sm:text-5xl font-black tracking-tight">{{ stats.total_members ? (stats.total_members + '+') : '380+' }}</div>
+                        <div class="text-4xl sm:text-5xl font-black tracking-tight">{{ animatedStats.members }}+</div>
                         <div class="text-xs font-extrabold uppercase tracking-widest text-blue-100">Anggota Aktif</div>
                     </div>
                     <div class="space-y-2 transform hover:scale-105 transition-transform duration-300">
-                        <div class="text-4xl sm:text-5xl font-black tracking-tight">{{ stats.total_visitors ? (stats.total_visitors + '+') : '125+' }}</div>
+                        <div class="text-4xl sm:text-5xl font-black tracking-tight">{{ animatedStats.visitors }}+</div>
                         <div class="text-xs font-extrabold uppercase tracking-widest text-blue-100">Pengunjung Harian</div>
                     </div>
                 </div>
