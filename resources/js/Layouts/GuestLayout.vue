@@ -28,7 +28,7 @@ const mobileMenuOpen = ref(false);
                 <div class="flex justify-between items-center h-11">
                     <!-- Brand Logo -->
                     <Link href="/" class="flex items-center gap-2 hover:opacity-90 transition-opacity">
-                        <img src="/images/logo.png" alt="Lentera Maron Logo" class="h-8 sm:h-9 w-auto object-contain" />
+                        <img src="/images/logo1.png" alt="Lentera Maron Logo" class="h-8 sm:h-9 w-auto object-contain" />
                     </Link>
 
                     <!-- Desktop Links -->
@@ -111,7 +111,7 @@ const mobileMenuOpen = ref(false);
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
                     <div class="md:col-span-2 space-y-4">
                         <div class="mb-2 flex items-center gap-2">
-                            <img src="/images/logo.png" alt="LITERA Logo" class="h-10 w-auto object-contain inline-block" />
+                            <img src="/images/logo1.png" alt="LITERA Logo" class="h-10 w-auto object-contain inline-block" />
                             <span class="text-white font-extrabold text-lg tracking-tight">LITERA</span>
                         </div>
                         <p class="max-w-md text-slate-400 text-sm leading-relaxed">

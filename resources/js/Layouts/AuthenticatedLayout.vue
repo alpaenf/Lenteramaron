@@ -106,7 +106,7 @@ const getGreeting = () => {
             <!-- Brand Logo -->
             <div class="flex items-center gap-3 px-3 py-3 border-b border-outline-variant/30 mb-3">
                 <Link href="/" class="flex items-center gap-2 hover:opacity-90 transition-opacity">
-                    <img src="/images/logo.png" alt="Lentera Maron Logo" class="h-9 w-auto object-contain" />
+                    <img src="/images/logo1.png" alt="Lentera Maron Logo" class="h-9 w-auto object-contain" />
                 </Link>
             </div>
 
@@ -253,7 +253,7 @@ const getGreeting = () => {
             <div v-if="sidebarOpen" class="fixed inset-y-0 left-0 w-72 bg-surface-container-lowest z-50 md:hidden flex flex-col p-4 shadow-2xl">
                 <div class="flex justify-between items-center pb-4 border-b border-outline-variant/30">
                     <Link href="/" class="flex items-center gap-2">
-                        <img src="/images/logo.png" alt="Lentera Maron Logo" class="h-9 w-auto object-contain" />
+                        <img src="/images/logo1.png" alt="Lentera Maron Logo" class="h-9 w-auto object-contain" />
                     </Link>
                     <button @click="sidebarOpen = false" class="p-1.5 rounded-xl hover:bg-surface-container-low text-on-surface-variant">
                         <X class="w-5 h-5" />
