@@ -20,30 +20,38 @@ class AcademicAggregatorService
     /**
      * Search academic papers with cache and graceful fallback.
      */
-    public function search(string $query, int $limit = 10): array
+    public function search(string $query, int $limit = 20): array
     {
         $cacheKey = 'litera_academic_' . md5(strtolower(trim($query)));
-        $ttlHours = config('litera.cache.search_ttl_hours', 24);
+        // Use 2 hour TTL so stale empty results expire quickly
+        $ttl = now()->addHours(2);
 
-        return Cache::remember($cacheKey, now()->addHours($ttlHours), function () use ($query, $limit) {
-            $results = [];
+        $cached = Cache::get($cacheKey);
+        // Only use cache if it has actual results
+        if ($cached !== null && count($cached) > 0) {
+            return $cached;
+        }
 
-            // 1. Fetch from OpenAlex
-            $openAlexResults = $this->openAlex->search($query, $limit);
-            foreach ($openAlexResults as $item) {
-                $results[] = $this->persistExternalSource($item);
-            }
+        $results = [];
 
-            // 2. Fetch from Semantic Scholar if needed
-            if (count($results) < $limit) {
-                $s2Results = $this->semanticScholar->search($query, $limit - count($results));
-                foreach ($s2Results as $item) {
-                    $results[] = $this->persistExternalSource($item);
-                }
-            }
+        // 1. Primary search: OpenAlex
+        $openAlexResults = $this->openAlex->search($query, $limit);
+        foreach ($openAlexResults as $item) {
+            $results[] = $this->persistExternalSource($item);
+        }
 
-            return $results;
-        });
+        // 2. Supplement with Semantic Scholar
+        $s2Results = $this->semanticScholar->search($query, max(5, $limit - count($results)));
+        foreach ($s2Results as $item) {
+            $results[] = $this->persistExternalSource($item);
+        }
+
+        // Only cache non-empty results
+        if (count($results) > 0) {
+            Cache::put($cacheKey, $results, $ttl);
+        }
+
+        return $results;
     }
 
     /**

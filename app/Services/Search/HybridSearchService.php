@@ -148,22 +148,58 @@ class HybridSearchService
 
     protected function searchExternalSources(string $query, array $expanded): array
     {
-        $englishTerms = $expanded['english_terms'] ?? [];
-        $searchTerm = !empty($englishTerms[0]) ? $englishTerms[0] : $query;
+        $englishTerms   = $expanded['english_terms'] ?? [];
+        $expandedKeywords = $expanded['keywords'] ?? [];
 
-        // Clean term: max 10 words for API stability
-        $words = explode(' ', $searchTerm);
-        if (count($words) > 10) {
-            $searchTerm = implode(' ', array_slice($words, 0, 10));
+        // Build a priority list of search terms to try
+        $searchTerms = [];
+
+        // 1. Best english translation first
+        if (!empty($englishTerms[0])) {
+            $searchTerms[] = $englishTerms[0];
         }
 
-        $results = $this->academicAggregator->search($searchTerm, 12);
+        // 2. Original query
+        $searchTerms[] = $query;
 
-        // Fallback: If 0 results with translated term, try original query
-        if (empty($results) && $searchTerm !== $query) {
-            $rawWords = explode(' ', $query);
-            $fallbackQuery = count($rawWords) > 10 ? implode(' ', array_slice($rawWords, 0, 10)) : $query;
-            $results = $this->academicAggregator->search($fallbackQuery, 12);
+        // 3. Second english term if different
+        if (!empty($englishTerms[1]) && $englishTerms[1] !== ($englishTerms[0] ?? '')) {
+            $searchTerms[] = $englishTerms[1];
+        }
+
+        // 4. Top expanded keywords joined
+        if (!empty($expandedKeywords)) {
+            $kwPhrase = implode(' ', array_slice($expandedKeywords, 0, 3));
+            if (!in_array($kwPhrase, $searchTerms)) {
+                $searchTerms[] = $kwPhrase;
+            }
+        }
+
+        // Deduplicate and clean: max 10 words per term
+        $seen = [];
+        $cleanTerms = [];
+        foreach ($searchTerms as $term) {
+            $term = trim($term);
+            $slug = strtolower($term);
+            if (empty($term) || isset($seen[$slug])) continue;
+            $seen[$slug] = true;
+            $words = explode(' ', $term);
+            $cleanTerms[] = count($words) > 10 ? implode(' ', array_slice($words, 0, 10)) : $term;
+        }
+
+        $results = [];
+        foreach ($cleanTerms as $searchTerm) {
+            if (count($results) >= 15) break;
+
+            $fetched = $this->academicAggregator->search($searchTerm, 20);
+            foreach ($fetched as $item) {
+                // Avoid duplicate titles
+                $titleKey = strtolower(trim($item['title'] ?? ''));
+                if (!isset($seen['title_' . $titleKey])) {
+                    $seen['title_' . $titleKey] = true;
+                    $results[] = $item;
+                }
+            }
         }
 
         $items = [];
