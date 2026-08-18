@@ -255,7 +255,7 @@ const getFallbackUrl = (category) => {
                     <div class="relative w-full max-w-lg mx-auto">
                         <img class="w-full h-auto object-contain drop-shadow-2xl transform hover:scale-[1.03] transition-transform duration-500" 
                              alt="LITERA AI Research Navigator Platform" 
-                             :src="settings.hero_banner_path ? '/files-media/' + settings.hero_banner_path : '/images/hero1.png'"/>
+                             :src="settings.hero_banner_path ? '/files-media/' + settings.hero_banner_path : '/images/hero1.webp'"/>
                     </div>
                 </div>
             </div>

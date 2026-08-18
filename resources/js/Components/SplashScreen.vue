@@ -20,7 +20,7 @@ const slides = [
         title: 'Selamat Datang di LITERA',
         subtitle: 'Platform Navigasi Pengetahuan & Riset Ilmiah',
         description: 'LITERA menjembatani koleksi buku perpustakaan lokal dengan jutaan jurnal ilmiah internasional terkini.',
-        image: '/images/splash1.png',
+        image: '/images/splash1.webp',
         badge: '100% Grounded AI',
     },
     {
@@ -28,7 +28,7 @@ const slides = [
         title: 'Penelusuran & Bedah Isi AI',
         subtitle: 'Indeks Literatur Global & Ringkasan Presisi',
         description: 'Cari artikel ilmiah dari OpenAlex & Semantic Scholar, lalu bedah fokus, metodologi, dan temuan kunci secara instan.',
-        image: '/images/splash2.png',
+        image: '/images/splash2.webp',
         badge: 'OpenAlex & Scholar',
     },
     {
@@ -36,7 +36,7 @@ const slides = [
         title: 'Ruang Kerja Digital Anda',
         subtitle: 'Katalog Perpustakaan & Ruang Simpan Sitasi',
         description: 'Simpan referensi pilihan ke Research Workspace pribadi Anda dan nikmati pemutar pembaca digital built-in.',
-        image: '/images/splash3.png',
+        image: '/images/splash3.webp',
         badge: 'Personal Workspace',
     },
 ];
@@ -86,6 +86,11 @@ const closeSplash = () => {
 };
 
 onMounted(() => {
+    // Preload all splash images into browser cache so slide transitions are instant
+    slides.forEach((slide) => {
+        const img = new Image();
+        img.src = slide.image;
+    });
     checkFirstVisit();
 });
 </script>
