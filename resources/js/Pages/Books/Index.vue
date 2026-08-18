@@ -221,12 +221,39 @@ const handleFileSelect = (e) => {
         reader.onload = (evt) => {
             try {
                 const text = evt.target.result;
-                const json = JSON.parse(text);
-                const arrayData = Array.isArray(json) ? json : (json.data || json.books || json.items || json.rows || []);
-                parsedCsvRows.value = arrayData.slice(0, 5001);
+                let arrayData = [];
+
+                try {
+                    const json = JSON.parse(text);
+                    if (Array.isArray(json)) {
+                        arrayData = json;
+                    } else if (typeof json === 'object' && json !== null) {
+                        arrayData = json.data || json.books || json.items || json.rows || json.results || json.works || Object.values(json);
+                    }
+                } catch (e) {
+                    // Try parsing as NDJSON (newline-delimited JSON)
+                    const lines = text.split(/\r\n|\n/);
+                    for (const line of lines) {
+                        if (!line || !line.trim()) continue;
+                        try {
+                            const parsedLine = JSON.parse(line.trim());
+                            if (typeof parsedLine === 'object' && parsedLine !== null) {
+                                arrayData.push(parsedLine);
+                            }
+                        } catch (errLine) {}
+                    }
+                }
+
+                if (!Array.isArray(arrayData) || arrayData.length === 0) {
+                    alert('Format file JSON tidak berisi daftar data buku. Pastikan file JSON berisi array objek buku.');
+                    parsedCsvRows.value = [];
+                    return;
+                }
+
+                parsedCsvRows.value = arrayData.slice(0, 5000);
             } catch (err) {
                 console.error('JSON Parsing Error:', err);
-                alert('Format file JSON tidak valid. Pastikan berisi array dari objek buku.');
+                alert('Format file JSON tidak valid.');
             } finally {
                 isParsingCsv.value = false;
             }

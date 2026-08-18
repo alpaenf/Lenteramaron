@@ -148,12 +148,51 @@ class BookController extends Controller
     public function importExcel(Request $request)
     {
         $request->validate([
-            'file' => 'required|file|mimes:xlsx,xls,csv,txt|max:20480',
+            'file' => 'required|file|mimes:xlsx,xls,csv,txt,json|max:30720',
         ]);
 
+        $file = $request->file('file');
+        $extension = strtolower($file->getClientOriginalExtension());
+
+        // If JSON file uploaded directly
+        if ($extension === 'json') {
+            try {
+                $content = file_get_contents($file->getRealPath());
+                $data = json_decode($content, true);
+
+                if (!is_array($data)) {
+                    // Try NDJSON (newline-delimited JSON)
+                    $lines = array_filter(explode("\n", str_replace("\r", "", $content)));
+                    $data = [];
+                    foreach ($lines as $l) {
+                        $parsed = json_decode(trim($l), true);
+                        if (is_array($parsed)) $data[] = $parsed;
+                    }
+                } else {
+                    // Extract if wrapped in object
+                    if (!isset($data[0])) {
+                        $data = $data['data'] ?? $data['books'] ?? $data['items'] ?? $data['results'] ?? $data['rows'] ?? array_values($data);
+                    }
+                }
+
+                if (!is_array($data) || empty($data)) {
+                    return redirect()->route('books.index')->with('error', 'File JSON tidak berisi data buku yang dapat dibaca.');
+                }
+
+                // Forward to batchImportJson internal logic
+                $fakeReq = new Request(['rows' => array_slice($data, 0, 5000)]);
+                $res = $this->batchImportJson($fakeReq);
+                $msg = $res->getData()->message ?? 'Berhasil mengimpor data JSON.';
+
+                return redirect()->route('books.index')->with('success', $msg);
+            } catch (\Throwable $e) {
+                return redirect()->route('books.index')->with('error', 'Gagal memproses file JSON: ' . $e->getMessage());
+            }
+        }
+
         try {
-            Excel::import(new BooksImport, $request->file('file'));
-            return redirect()->route('books.index')->with('success', 'Data buku berhasil diimport (Maksimal 500 baris per unggahan).');
+            Excel::import(new BooksImport, $file);
+            return redirect()->route('books.index')->with('success', 'Data buku berhasil diimport.');
         } catch (\Throwable $e) {
             return redirect()->route('books.index')->with('error', 'Gagal mengimpor file: ' . $e->getMessage());
         }
