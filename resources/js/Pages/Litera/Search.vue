@@ -18,7 +18,10 @@ import {
     ArrowRight,
     Loader2,
     ShieldCheck,
-    FileSpreadsheet
+    FileSpreadsheet,
+    Pin,
+    Wrench,
+    Lightbulb
 } from 'lucide-vue-next';
 
 const props = defineProps({
@@ -698,8 +701,8 @@ const filteredItems = computed(() => {
                     <div v-else-if="analysisData" class="space-y-4 text-xs">
                         <!-- 1. Fokus Utama -->
                         <div class="bg-purple-50/70 p-4 rounded-2xl border border-purple-100 space-y-1">
-                            <h5 class="font-extrabold text-purple-900 text-xs flex items-center gap-1.5">
-                                <span>📌</span>
+                            <h5 class="font-extrabold text-purple-900 text-xs flex items-center gap-2">
+                                <Pin class="w-4 h-4 text-purple-600 shrink-0" />
                                 <span>Fokus & Ruang Lingkup Utama</span>
                             </h5>
                             <p class="text-slate-700 font-medium leading-relaxed">{{ analysisData.fokus_utama }}</p>
@@ -707,8 +710,8 @@ const filteredItems = computed(() => {
 
                         <!-- 2. Metodologi & Pendekatan -->
                         <div class="bg-blue-50/70 p-4 rounded-2xl border border-blue-100 space-y-1">
-                            <h5 class="font-extrabold text-blue-900 text-xs flex items-center gap-1.5">
-                                <span>🛠️</span>
+                            <h5 class="font-extrabold text-blue-900 text-xs flex items-center gap-2">
+                                <Wrench class="w-4 h-4 text-blue-600 shrink-0" />
                                 <span>Metodologi & Kerangka Pendekatan</span>
                             </h5>
                             <p class="text-slate-700 font-medium leading-relaxed">{{ analysisData.metodologi_pendekatan }}</p>
@@ -716,8 +719,8 @@ const filteredItems = computed(() => {
 
                         <!-- 3. Temuan & Kontribusi -->
                         <div class="bg-emerald-50/70 p-4 rounded-2xl border border-emerald-100 space-y-1">
-                            <h5 class="font-extrabold text-emerald-900 text-xs flex items-center gap-1.5">
-                                <span>💡</span>
+                            <h5 class="font-extrabold text-emerald-900 text-xs flex items-center gap-2">
+                                <Lightbulb class="w-4 h-4 text-emerald-600 shrink-0" />
                                 <span>Temuan Kunci & Kontribusi Pengetahuan</span>
                             </h5>
                             <p class="text-slate-700 font-medium leading-relaxed whitespace-pre-line">{{ analysisData.temuan_kontribusi }}</p>
@@ -725,8 +728,8 @@ const filteredItems = computed(() => {
 
                         <!-- 4. Implikasi Riset -->
                         <div class="bg-amber-50/70 p-4 rounded-2xl border border-amber-100 space-y-1">
-                            <h5 class="font-extrabold text-amber-900 text-xs flex items-center gap-1.5">
-                                <span>🔍</span>
+                            <h5 class="font-extrabold text-amber-900 text-xs flex items-center gap-2">
+                                <Search class="w-4 h-4 text-amber-600 shrink-0" />
                                 <span>Rekomendasi Implikasi & Penggunaan Riset</span>
                             </h5>
                             <p class="text-slate-700 font-medium leading-relaxed">{{ analysisData.implikasi_riset }}</p>
