@@ -215,7 +215,24 @@ const handleFileSelect = (e) => {
     importForm.file = file;
     parsedCsvRows.value = [];
 
-    if (file.name.endsWith('.csv') || file.name.endsWith('.txt') || file.type.includes('csv')) {
+    if (file.name.endsWith('.json') || file.type.includes('json')) {
+        isParsingCsv.value = true;
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+            try {
+                const text = evt.target.result;
+                const json = JSON.parse(text);
+                const arrayData = Array.isArray(json) ? json : (json.data || json.books || json.items || json.rows || []);
+                parsedCsvRows.value = arrayData.slice(0, 5001);
+            } catch (err) {
+                console.error('JSON Parsing Error:', err);
+                alert('Format file JSON tidak valid. Pastikan berisi array dari objek buku.');
+            } finally {
+                isParsingCsv.value = false;
+            }
+        };
+        reader.readAsText(file);
+    } else if (file.name.endsWith('.csv') || file.name.endsWith('.txt') || file.type.includes('csv')) {
         isParsingCsv.value = true;
         const reader = new FileReader();
         reader.onload = (evt) => {
@@ -626,8 +643,8 @@ const submitBatchIsbn = async () => {
                     <form @submit.prevent="submitImport" class="space-y-4 text-xs">
                         <!-- Format Helper Banner -->
                         <div class="p-4 bg-blue-50/80 border border-blue-100 rounded-2xl text-blue-950 space-y-1">
-                            <span class="font-bold">Format Excel / CSV (.xlsx, .xls, .csv):</span>
-                            <p class="text-[11px] text-slate-600">Dapat mengunggah file lokal (header Indonesia) atau file dataset Kaggle/Goodreads langsung (header Inggris: <code>title, author, publisher, isbn, year</code>).</p>
+                            <span class="font-bold">Format Dataset (.json, .csv, .xlsx, .xls):</span>
+                            <p class="text-[11px] text-slate-600">Dapat mengunggah file JSON (array dari objek), file lokal CSV (header Indonesia), atau dataset Kaggle/Goodreads (header Inggris: <code>title, author, publisher, isbn, year</code>).</p>
                         </div>
 
                         <!-- Error Alert inside Modal -->
@@ -657,12 +674,12 @@ const submitBatchIsbn = async () => {
                         </div>
 
                         <div v-else class="space-y-2">
-                            <label class="block font-bold text-slate-700 uppercase mb-1">Pilih File Dataset (.csv / .xlsx)</label>
-                            <input @change="handleFileSelect" type="file" required accept=".xlsx,.xls,.csv,.txt" class="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:bg-blue-600 file:text-white font-bold cursor-pointer" />
+                            <label class="block font-bold text-slate-700 uppercase mb-1">Pilih File Dataset (.json / .csv / .xlsx)</label>
+                            <input @change="handleFileSelect" type="file" required accept=".json,.csv,.xlsx,.xls,.txt" class="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:bg-blue-600 file:text-white font-bold cursor-pointer" />
                             
                             <div v-if="parsedCsvRows.length > 0" class="p-2.5 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-[11px] font-medium flex items-center justify-between">
                                 <span>✓ Siap mengimpor {{ parsedCsvRows.length }} baris buku secara instan</span>
-                                <span class="font-mono text-[10px] bg-emerald-200/60 px-2 py-0.5 rounded-full">JSON Fast Mode</span>
+                                <span class="font-mono text-[10px] bg-emerald-200/60 px-2 py-0.5 rounded-full">Fast JSON Upload</span>
                             </div>
                         </div>
 
