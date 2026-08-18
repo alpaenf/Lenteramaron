@@ -39,19 +39,17 @@ const submit = () => {
         <!-- Main Login Container Card -->
         <main class="w-full max-w-[960px] flex flex-col md:flex-row bg-white rounded-3xl shadow-[0px_4px_30px_rgba(0,0,0,0.08)] overflow-hidden my-auto border border-slate-100">
             <!-- Left Side: Illustration & Branding -->
-            <section class="hidden md:flex md:w-1/2 bg-gradient-to-br from-blue-900 via-slate-900 to-blue-950 text-white relative flex-col items-center justify-center p-8 lg:p-10 overflow-hidden">
+            <section class="hidden md:flex md:w-1/2 bg-white text-slate-900 border-r border-slate-100 relative flex-col items-center justify-center p-8 lg:p-10 overflow-hidden">
                 <div class="relative z-10 text-center flex flex-col items-center">
                     <img src="/images/logo2.png" alt="LITERA Logo" class="h-12 w-auto object-contain mb-4" />
 
-                    <h3 class="text-xl font-black text-white">LITERA</h3>
-                    <p class="text-blue-200 text-xs max-w-xs mb-6 leading-relaxed font-medium mt-1">
+                    <h3 class="text-xl font-black text-slate-900">LITERA</h3>
+                    <p class="text-slate-500 text-xs max-w-xs mb-6 leading-relaxed font-medium mt-1">
                         AI-Powered Research &amp; Library Navigator. Menghubungkan koleksi referensi dengan sumber ilmiah internasional.
                     </p>
 
-                    <!-- Featured Image Card -->
-                    <div class="w-full max-w-xs rounded-2xl overflow-hidden shadow-lg border-2 border-white/20 transform -rotate-1 hover:rotate-0 transition-transform duration-500 bg-white/5">
-                        <img src="/images/hero1.png" alt="LITERA Platform" class="w-full h-auto object-contain" />
-                    </div>
+                    <!-- Featured Image Directly -->
+                    <img src="/images/hero1.png" alt="LITERA Platform" class="w-full max-w-xs h-auto object-contain" />
                 </div>
             </section>
 

@@ -31,23 +31,23 @@ const submit = () => {
         <!-- Main Register Card -->
         <main class="w-full max-w-[960px] flex flex-col md:flex-row bg-white rounded-3xl shadow-[0px_4px_30px_rgba(0,0,0,0.08)] overflow-hidden my-auto border border-slate-100">
             <!-- Left Side: Branding Banner -->
-            <section class="hidden md:flex md:w-5/12 bg-gradient-to-br from-blue-900 via-slate-900 to-blue-950 text-white relative flex-col items-center justify-center p-8 lg:p-10 overflow-hidden">
+            <section class="hidden md:flex md:w-5/12 bg-white text-slate-900 border-r border-slate-100 relative flex-col items-center justify-center p-8 lg:p-10 overflow-hidden">
                 <div class="relative z-10 text-center flex flex-col items-center">
                     <img src="/images/logo2.png" alt="LITERA Logo" class="h-12 w-auto object-contain mb-4" />
 
-                    <h3 class="text-2xl font-black text-white tracking-tight">LITERA</h3>
-                    <p class="text-blue-200 text-xs max-w-xs mb-6 leading-relaxed font-medium mt-1">
+                    <h3 class="text-2xl font-black text-slate-900 tracking-tight">LITERA</h3>
+                    <p class="text-slate-500 text-xs max-w-xs mb-6 leading-relaxed font-medium mt-1">
                         Bergabunglah dengan platform navigasi penelitian ilmiah berbasis kecerdasan buatan.
                     </p>
 
                     <!-- Feature Bullet Highlights -->
-                    <div class="space-y-3 text-left w-full max-w-xs text-xs font-semibold text-blue-100">
-                        <div class="flex items-center gap-2.5 p-3 rounded-2xl bg-white/10 backdrop-blur-xs border border-white/10">
-                            <Sparkles class="w-4 h-4 text-amber-400 shrink-0" />
+                    <div class="space-y-3 text-left w-full max-w-xs text-xs font-semibold text-slate-700">
+                        <div class="flex items-center gap-2.5 p-3 rounded-2xl bg-blue-50/80 border border-blue-100">
+                            <Sparkles class="w-4 h-4 text-blue-600 shrink-0" />
                             <span>Akses AI Research Search</span>
                         </div>
-                        <div class="flex items-center gap-2.5 p-3 rounded-2xl bg-white/10 backdrop-blur-xs border border-white/10">
-                            <BookOpen class="w-4 h-4 text-blue-400 shrink-0" />
+                        <div class="flex items-center gap-2.5 p-3 rounded-2xl bg-blue-50/80 border border-blue-100">
+                            <BookOpen class="w-4 h-4 text-blue-600 shrink-0" />
                             <span>Personal Research Workspace</span>
                         </div>
                     </div>

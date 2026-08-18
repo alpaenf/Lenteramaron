@@ -49,11 +49,6 @@ const showSplashModal = ref(false);
 
                     <!-- CTA Buttons -->
                     <div class="hidden md:flex items-center gap-2">
-                        <Link href="/litera/workspace" class="bg-slate-100 hover:bg-slate-200 text-slate-800 px-4 py-2 rounded-full font-bold transition-all text-xs flex items-center gap-1.5 border border-slate-200">
-                            <BookOpen class="w-3.5 h-3.5 text-blue-600" />
-                            <span>Research Workspace</span>
-                        </Link>
-
                         <Link v-if="page.props.auth?.user" href="/dashboard" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-full font-bold transition-all shadow-md shadow-blue-500/20 text-xs flex items-center gap-2">
                             <span>Dashboard</span>
                         </Link>
@@ -78,10 +73,6 @@ const showSplashModal = ref(false);
                     <Link href="/litera/search" @click="mobileMenuOpen = false" class="px-4 py-2.5 rounded-xl text-blue-600 hover:bg-blue-50 font-extrabold text-sm transition-colors flex items-center gap-2">
                         <Sparkles class="w-4 h-4 text-blue-600" />
                         <span>AI Research Search</span>
-                    </Link>
-                    <Link href="/litera/workspace" @click="mobileMenuOpen = false" class="px-4 py-2.5 rounded-xl text-slate-800 hover:bg-slate-100 font-extrabold text-sm transition-colors flex items-center gap-2">
-                        <BookOpen class="w-4 h-4 text-blue-600" />
-                        <span>Research Workspace</span>
                     </Link>
                     <Link @click="mobileMenuOpen = false" href="/" class="block px-4 py-2.5 rounded-xl text-slate-700 hover:text-blue-600 hover:bg-blue-50 font-bold text-sm transition-colors">Beranda</Link>
                     <a @click="mobileMenuOpen = false" href="/#profil" class="block px-4 py-2.5 rounded-xl text-slate-700 hover:text-blue-600 hover:bg-blue-50 font-bold text-sm transition-colors">Profil</a>
