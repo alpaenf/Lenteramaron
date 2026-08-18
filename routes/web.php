@@ -14,6 +14,7 @@ use App\Http\Controllers\SettingController;
 use App\Http\Controllers\LiteraSearchController;
 use App\Http\Controllers\ResearchWorkspaceController;
 use App\Http\Controllers\MetadataEnrichmentController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -158,8 +159,13 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/galleries/{gallery}', [GalleryController::class, 'destroy'])->name('galleries.destroy');
     });
 
-    // Settings (Admin Only)
+    // User Management & Settings (Admin Only)
     Route::middleware(['role:Admin'])->group(function () {
+        Route::get('/users', [UserController::class, 'index'])->name('users.index');
+        Route::post('/users', [UserController::class, 'store'])->name('users.store');
+        Route::match(['put', 'patch'], '/users/{user}', [UserController::class, 'update'])->name('users.update');
+        Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
+
         Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
         Route::post('/settings', [SettingController::class, 'update'])->name('settings.update');
     });

@@ -56,7 +56,18 @@ const logout = () => {
 const filteredNav = computed(() => {
     const roleLower = (user.value.role || '').toLowerCase();
     
-    if (['admin', 'pustakawan', 'kepala_sekolah'].includes(roleLower)) {
+    if (roleLower === 'admin') {
+        return [
+            { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+            { name: 'AI Research Search', href: '/litera/search', icon: Sparkles },
+            { name: 'Research Workspace', href: '/litera/workspace', icon: BookOpen },
+            { name: 'Katalog Referensi', href: '/books', icon: BookMarked },
+            { name: 'Manajemen Pengguna', href: '/users', icon: Users },
+            { name: 'Laporan & Analytics', href: '/reports', icon: BarChart3 },
+            { name: 'Galeri Kegiatan', href: '/galleries', icon: ImageIcon },
+            { name: 'Pengaturan Sistem', href: '/settings', icon: Settings },
+        ];
+    } else if (['pustakawan', 'kepala_sekolah', 'guru'].includes(roleLower)) {
         return [
             { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
             { name: 'AI Research Search', href: '/litera/search', icon: Sparkles },
@@ -64,7 +75,6 @@ const filteredNav = computed(() => {
             { name: 'Katalog Referensi', href: '/books', icon: BookMarked },
             { name: 'Laporan & Analytics', href: '/reports', icon: BarChart3 },
             { name: 'Galeri Kegiatan', href: '/galleries', icon: ImageIcon },
-            { name: 'Pengaturan Sistem', href: '/settings', icon: Settings },
         ];
     } else {
         // Researcher / Educator / Student / User roles
