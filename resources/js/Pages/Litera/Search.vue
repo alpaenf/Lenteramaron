@@ -180,6 +180,14 @@ const openExplainModal = async (item) => {
     }
 };
 
+const formatSourceProvider = (provider) => {
+    if (!provider) return 'OpenAlex';
+    if (provider === 'google_scholar') return 'Google Scholar';
+    if (provider === 'semantic_scholar') return 'Semantic Scholar';
+    if (provider === 'openalex') return 'OpenAlex';
+    return provider;
+};
+
 const openResearchPathModal = async () => {
     if (!searchData.value || !searchData.value.items || searchData.value.items.length === 0) return;
 
@@ -415,7 +423,7 @@ const filteredItems = computed(() => {
                                             'px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider text-[10px]',
                                             item.source_type === 'local' ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-blue-100 text-blue-800 border border-blue-200'
                                         ]">
-                                            {{ item.source_type === 'local' ? 'Koleksi Perpustakaan' : 'Jurnal Eksternal (' + (item.source_provider || 'OpenAlex') + ')' }}
+                                            {{ item.source_type === 'local' ? 'Koleksi Perpustakaan' : formatSourceProvider(item.source_provider) }}
                                         </span>
 
                                         <span v-if="item.open_access" class="bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full text-[10px] font-semibold border border-amber-200">

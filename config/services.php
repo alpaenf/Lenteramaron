@@ -35,4 +35,10 @@ return [
         ],
     ],
 
+    'serpapi' => [
+        'api_key'  => env('SERPAPI_KEY', env('SERP_API_KEY')),
+        'base_url' => 'https://serpapi.com/search',
+        'timeout'  => 12,
+    ],
+
 ];

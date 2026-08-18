@@ -10,11 +10,16 @@ class AcademicAggregatorService
 {
     protected OpenAlexService $openAlex;
     protected SemanticScholarService $semanticScholar;
+    protected SerpApiScholarService $serpApiScholar;
 
-    public function __construct(OpenAlexService $openAlex, SemanticScholarService $semanticScholar)
-    {
+    public function __construct(
+        OpenAlexService $openAlex,
+        SemanticScholarService $semanticScholar,
+        SerpApiScholarService $serpApiScholar
+    ) {
         $this->openAlex = $openAlex;
         $this->semanticScholar = $semanticScholar;
+        $this->serpApiScholar = $serpApiScholar;
     }
 
     /**
@@ -30,15 +35,23 @@ class AcademicAggregatorService
             return $cached;
         }
 
-        $halfLimit = max(5, (int) ceil($limit / 2));
+        $eachLimit = max(4, (int) ceil($limit / 3));
 
-        // 1. Fetch from OpenAlex
-        $openAlexRaw = $this->openAlex->search($query, $halfLimit);
+        // 1. Fetch from SerpApi Google Scholar (if API key available)
+        $serpRaw = $this->serpApiScholar->search($query, $eachLimit);
+
+        // 2. Fetch from OpenAlex
+        $openAlexRaw = $this->openAlex->search($query, $eachLimit);
         
-        // 2. Fetch from Semantic Scholar
-        $s2Raw = $this->semanticScholar->search($query, $halfLimit);
+        // 3. Fetch from Semantic Scholar
+        $s2Raw = $this->semanticScholar->search($query, $eachLimit);
 
-        // 3. Persist and format
+        // 4. Persist and format
+        $serpResults = [];
+        foreach ($serpRaw as $item) {
+            $serpResults[] = $this->persistExternalSource($item);
+        }
+
         $openAlexResults = [];
         foreach ($openAlexRaw as $item) {
             $openAlexResults[] = $this->persistExternalSource($item);
@@ -49,10 +62,13 @@ class AcademicAggregatorService
             $s2Results[] = $this->persistExternalSource($item);
         }
 
-        // 4. Interleave results (1 OpenAlex, 1 Semantic Scholar...)
+        // 5. Interleave results across Google Scholar, OpenAlex, Semantic Scholar
         $results = [];
-        $maxCount = max(count($openAlexResults), count($s2Results));
+        $maxCount = max(count($serpResults), count($openAlexResults), count($s2Results));
         for ($i = 0; $i < $maxCount; $i++) {
+            if (isset($serpResults[$i])) {
+                $results[] = $serpResults[$i];
+            }
             if (isset($openAlexResults[$i])) {
                 $results[] = $openAlexResults[$i];
             }
