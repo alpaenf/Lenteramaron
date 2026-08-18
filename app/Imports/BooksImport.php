@@ -6,35 +6,54 @@ use App\Models\Book;
 use App\Models\BookCategory;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
+use Maatwebsite\Excel\Concerns\WithLimit;
+use Maatwebsite\Excel\Concerns\WithChunkReading;
 
-class BooksImport implements ToModel, WithHeadingRow
+class BooksImport implements ToModel, WithHeadingRow, WithLimit, WithChunkReading
 {
+    public function limit(): int
+    {
+        return 500; // Limit to 500 rows per upload batch for instant execution & zero timeout
+    }
+
+    public function chunkSize(): int
+    {
+        return 100;
+    }
+
     public function model(array $row)
     {
+        // Normalize array keys to lowercase stripped of special characters
+        $cleanRow = [];
+        foreach ($row as $k => $v) {
+            $cleanKey = strtolower(preg_replace('/[^a-zA-Z0-9_]/', '', str_replace(['-', ' '], '_', (string)$k)));
+            $cleanRow[$cleanKey] = $v;
+        }
+
         // 1. Flexible Title Detection
-        $title = $row['judul_buku'] ?? $row['judul'] ?? $row['title'] ?? $row['book_title'] ?? $row['book_title_clean'] ?? null;
+        $title = $cleanRow['judul_buku'] ?? $cleanRow['judul'] ?? $cleanRow['title'] ?? $cleanRow['book_title'] ?? $cleanRow['booktitle'] ?? null;
         if (empty($title)) {
-            return null; // Skip empty rows
+            return null; // Skip empty or title-less rows
         }
 
         // 2. Flexible ISBN Detection
-        $isbn = $row['isbn'] ?? $row['isbn13'] ?? $row['isbn10'] ?? $row['book_isbn'] ?? null;
+        $isbn = $cleanRow['isbn'] ?? $cleanRow['isbn13'] ?? $cleanRow['isbn10'] ?? $cleanRow['book_isbn'] ?? $cleanRow['bookisbn'] ?? null;
 
         // 3. Flexible Author Detection
-        $author = $row['pengarang'] ?? $row['author'] ?? $row['authors'] ?? $row['book_author'] ?? 'Penulis Referensi';
+        $author = $cleanRow['pengarang'] ?? $cleanRow['author'] ?? $cleanRow['authors'] ?? $cleanRow['book_author'] ?? $cleanRow['bookauthor'] ?? 'Penulis Referensi';
 
         // 4. Flexible Publisher Detection
-        $publisher = $row['penerbit'] ?? $row['publisher'] ?? 'Penerbit Umum';
+        $publisher = $cleanRow['penerbit'] ?? $cleanRow['publisher'] ?? 'Penerbit Umum';
 
         // 5. Flexible Year Detection
-        $yearRaw = $row['tahun'] ?? $row['year'] ?? $row['published_year'] ?? $row['year_of_publication'] ?? date('Y');
+        $yearRaw = $cleanRow['tahun'] ?? $cleanRow['year'] ?? $cleanRow['published_year'] ?? $cleanRow['publishedyear'] ?? $cleanRow['year_of_publication'] ?? date('Y');
         $year = (int) preg_replace('/[^0-9]/', '', (string)$yearRaw);
         if ($year < 1900 || $year > ((int)date('Y') + 2)) {
             $year = (int) date('Y');
         }
 
         // 6. Flexible Category & Shelf Detection
-        $rawCat = $row['kategori'] ?? $row['category'] ?? $row['categories'] ?? 'Karya Umum & Komputer';
+        $rawCat = $cleanRow['kategori'] ?? $cleanRow['category'] ?? $cleanRow['categories'] ?? 'Karya Umum & Komputer';
         $categoryName = trim(explode(',', (string)$rawCat)[0]);
         if (empty($categoryName)) {
             $categoryName = 'Karya Umum & Komputer';
@@ -45,14 +64,14 @@ class BooksImport implements ToModel, WithHeadingRow
             ['code' => (string) rand(100, 999), 'description' => 'Kategori Referensi Import']
         );
 
-        $shelf = $row['rak'] ?? $row['shelf'] ?? 'Rak Referensi';
-        $stock = (int) ($row['stok'] ?? $row['stock'] ?? 5);
+        $shelf = $cleanRow['rak'] ?? $cleanRow['shelf'] ?? 'Rak Referensi';
+        $stock = (int) ($cleanRow['stok'] ?? $cleanRow['stock'] ?? 5);
 
         // 7. Flexible Description & Cover Image Detection
-        $description = $row['deskripsi'] ?? $row['description'] ?? $row['abstract'] ?? $row['summary'] ?? null;
-        $cover = $row['cover'] ?? $row['image_url_l'] ?? $row['image_url_m'] ?? $row['thumbnail'] ?? $row['image'] ?? null;
+        $description = $cleanRow['deskripsi'] ?? $cleanRow['description'] ?? $cleanRow['abstract'] ?? $cleanRow['summary'] ?? null;
+        $cover = $cleanRow['cover'] ?? $cleanRow['image_url_l'] ?? $cleanRow['image_url_m'] ?? $cleanRow['image_url_s'] ?? $cleanRow['thumbnail'] ?? $cleanRow['image'] ?? null;
 
-        $code = $row['kode_buku'] ?? $row['book_code'] ?? ('BK-' . sprintf('%04d', rand(1000, 9999)));
+        $code = $cleanRow['kode_buku'] ?? $cleanRow['book_code'] ?? ('BK-' . sprintf('%04d', rand(1000, 9999)));
 
         return new Book([
             'book_code'   => trim((string)$code),

@@ -544,17 +544,34 @@ const submitBatchIsbn = async () => {
                             <p class="text-[11px] text-slate-600">Dapat mengunggah file lokal (header Indonesia) atau file dataset Kaggle/Goodreads langsung (header Inggris: <code>title, author, publisher, isbn, year</code>).</p>
                         </div>
 
-                        <!-- Processing Spinning Banner -->
-                        <div v-if="importForm.processing" class="p-5 text-center text-slate-700 space-y-2 bg-blue-50/90 rounded-2xl border border-blue-200 animate-pulse">
+                        <!-- Error Alert inside Modal -->
+                        <div v-if="importForm.errors.file" class="p-3.5 bg-rose-50 border border-rose-200 text-rose-700 rounded-2xl font-medium text-xs">
+                            ⚠️ {{ importForm.errors.file }}
+                        </div>
+
+                        <!-- Processing & Live Percentage Progress Bar -->
+                        <div v-if="importForm.processing" class="p-5 text-center text-slate-700 space-y-3 bg-blue-50/90 rounded-2xl border border-blue-200">
                             <Loader2 class="w-8 h-8 text-blue-600 animate-spin mx-auto" />
                             <div>
-                                <p class="font-extrabold text-sm text-blue-950">Sedang Memproses &amp; Mengimpor Dataset...</p>
-                                <p class="text-[11px] text-slate-600 mt-0.5 font-medium">Mohon tunggu sebentar, sistem sedang membaca dan mengunggah seluruh data ke database.</p>
+                                <p class="font-extrabold text-sm text-blue-950">
+                                    Sedang Memproses &amp; Mengimpor Dataset... 
+                                    <span v-if="importForm.progress" class="text-blue-600 font-mono text-xs ml-1">({{ importForm.progress.percentage }}%)</span>
+                                </p>
+                                <p class="text-[11px] text-slate-600 mt-0.5 font-medium">Mohon tunggu sebentar, sistem sedang membaca dan menyimpan data ke database (maksimal 500 baris per batch).</p>
+                            </div>
+
+                            <!-- Animated Live Progress Bar -->
+                            <div v-if="importForm.progress" class="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden shadow-inner">
+                                <div 
+                                    class="bg-blue-600 h-2.5 rounded-full transition-all duration-300 shadow-sm" 
+                                    :style="{ width: importForm.progress.percentage + '%' }"
+                                ></div>
                             </div>
                         </div>
 
                         <div v-else>
-                            <input @change="e => importForm.file = e.target.files[0]" type="file" required accept=".xlsx,.xls,.csv" class="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:bg-blue-600 file:text-white font-bold cursor-pointer" />
+                            <label class="block font-bold text-slate-700 uppercase mb-1">Pilih File Dataset (.csv / .xlsx)</label>
+                            <input @change="e => importForm.file = e.target.files[0]" type="file" required accept=".xlsx,.xls,.csv,.txt" class="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:bg-blue-600 file:text-white font-bold cursor-pointer" />
                         </div>
 
                         <div class="pt-2 flex justify-end gap-3">
@@ -565,7 +582,7 @@ const submitBatchIsbn = async () => {
                                 class="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-extrabold shadow-md shadow-blue-500/20 transition flex items-center justify-center gap-2 cursor-pointer"
                             >
                                 <Loader2 v-if="importForm.processing" class="w-4 h-4 text-white animate-spin shrink-0" />
-                                <span>{{ importForm.processing ? 'Memproses Impor...' : 'Mulai Import Data' }}</span>
+                                <span>{{ importForm.processing ? `Mengunggah ${importForm.progress ? importForm.progress.percentage + '%' : '...'}` : 'Mulai Import Data' }}</span>
                             </button>
                         </div>
                     </form>

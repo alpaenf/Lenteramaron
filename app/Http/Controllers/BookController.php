@@ -148,11 +148,14 @@ class BookController extends Controller
     public function importExcel(Request $request)
     {
         $request->validate([
-            'file' => 'required|mimes:xlsx,xls,csv|max:5120',
+            'file' => 'required|file|mimes:xlsx,xls,csv,txt|max:20480',
         ]);
 
-        Excel::import(new BooksImport, $request->file('file'));
-
-        return redirect()->route('books.index')->with('success', 'Data buku berhasil diimport dari Excel.');
+        try {
+            Excel::import(new BooksImport, $request->file('file'));
+            return redirect()->route('books.index')->with('success', 'Data buku berhasil diimport (Maksimal 500 baris per unggahan).');
+        } catch (\Throwable $e) {
+            return redirect()->route('books.index')->with('error', 'Gagal mengimpor file: ' . $e->getMessage());
+        }
     }
 }
