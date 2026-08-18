@@ -8,6 +8,7 @@ import {
     Search, 
     Sparkles, 
     BookOpen, 
+    BookOpenText,
     Bookmark, 
     ExternalLink, 
     HelpCircle, 
@@ -57,6 +58,35 @@ const isExplainLoading = ref(false);
 const isPathModalOpen = ref(false);
 const isPathLoading = ref(false);
 const researchPathSteps = ref([]);
+
+// Reader Modal State
+const isReaderModalOpen = ref(false);
+const readerItem = ref(null);
+
+const getGoogleBooksUrl = (item) => {
+    if (item.isbn) {
+        return `https://books.google.com/books?vid=ISBN${item.isbn}`;
+    }
+    const q = encodeURIComponent(item.title + (item.author ? ' ' + item.author : ''));
+    return `https://books.google.com/books?q=${q}`;
+};
+
+const openReaderModal = (item) => {
+    readerItem.value = item;
+    isReaderModalOpen.value = true;
+};
+
+const getReadLabel = (item) => {
+    if (item.source_type === 'local') return 'Baca di Google Books';
+    if (item.pdf_url) return 'Baca PDF';
+    if (item.url) return 'Buka Artikel';
+    return null;
+};
+
+const canRead = (item) => {
+    if (item.source_type === 'local') return true;
+    return !!(item.pdf_url || item.url);
+};
 
 // Notification alert
 const toastMessage = ref('');
@@ -399,15 +429,16 @@ const filteredItems = computed(() => {
                                 </button>
 
                                 <div class="flex items-center gap-2">
-                                    <a
-                                        v-if="item.url || item.pdf_url"
-                                        :href="item.pdf_url || item.url"
-                                        target="_blank"
-                                        class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg transition flex items-center gap-1"
+                                    <!-- Smart Read Button -->
+                                    <button
+                                        v-if="canRead(item)"
+                                        @click="openReaderModal(item)"
+                                        class="px-3 py-1.5 font-bold rounded-lg shadow-sm transition flex items-center gap-1 text-white"
+                                        :class="item.source_type === 'local' ? 'bg-emerald-600 hover:bg-emerald-700' : (item.pdf_url ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-slate-500 hover:bg-slate-600')"
                                     >
-                                        <span>Buka Artikel</span>
-                                        <ExternalLink class="w-3.5 h-3.5" />
-                                    </a>
+                                        <BookOpenText class="w-3.5 h-3.5" />
+                                        <span>{{ getReadLabel(item) }}</span>
+                                    </button>
 
                                     <button
                                         @click="saveToWorkspace(item)"
@@ -507,6 +538,90 @@ const filteredItems = computed(() => {
                     <button @click="isPathModalOpen = false" class="px-5 py-2.5 bg-blue-600 text-white font-bold rounded-xl text-xs hover:bg-blue-700 shadow-md">
                         Saya Mengerti
                     </button>
+                </div>
+            </div>
+        </div>
+        <!-- ============================================ -->
+        <!-- READER MODAL                                -->
+        <!-- ============================================ -->
+        <div v-if="isReaderModalOpen && readerItem" class="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6">
+            <div class="bg-white rounded-3xl w-full max-w-5xl shadow-2xl border border-slate-100 flex flex-col" style="height: 92vh;">
+                <!-- Header -->
+                <div class="flex items-start justify-between px-6 py-4 border-b border-slate-100 flex-shrink-0">
+                    <div class="flex-1 min-w-0 pr-4">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span :class="[
+                                'px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider text-[10px]',
+                                readerItem.source_type === 'local' ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-indigo-100 text-indigo-800 border border-indigo-200'
+                            ]">
+                                {{ readerItem.source_type === 'local' ? 'Koleksi Perpustakaan' : 'Jurnal Eksternal' }}
+                            </span>
+                            <span v-if="readerItem.pdf_url" class="bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full text-[10px] font-semibold border border-amber-200">PDF Open Access</span>
+                        </div>
+                        <h3 class="font-bold text-slate-900 text-base leading-snug line-clamp-2">{{ readerItem.title }}</h3>
+                        <p class="text-xs text-slate-500 mt-0.5" v-if="readerItem.author">{{ readerItem.author }}</p>
+                    </div>
+                    <div class="flex items-center gap-2 flex-shrink-0">
+                        <!-- Open in new tab -->
+                        <a
+                            :href="readerItem.source_type === 'local' ? getGoogleBooksUrl(readerItem) : (readerItem.pdf_url || readerItem.url)"
+                            target="_blank"
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl text-xs transition"
+                        >
+                            <ExternalLink class="w-3.5 h-3.5" />
+                            <span class="hidden sm:inline">Buka Tab Baru</span>
+                        </a>
+                        <button @click="isReaderModalOpen = false" class="p-2 rounded-xl text-slate-400 hover:bg-slate-100 transition">
+                            <X class="w-5 h-5" />
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Reader Body -->
+                <div class="flex-1 overflow-hidden rounded-b-3xl bg-slate-100">
+                    <!-- Local Book: Google Books iFrame embed -->
+                    <template v-if="readerItem.source_type === 'local'">
+                        <iframe
+                            :src="`https://books.google.com/books?${readerItem.isbn ? 'vid=ISBN' + readerItem.isbn : 'q=' + encodeURIComponent(readerItem.title)}&output=embed`"
+                            class="w-full h-full rounded-b-3xl"
+                            frameborder="0"
+                            allowfullscreen
+                            title="Google Books Preview"
+                        />
+                    </template>
+
+                    <!-- External with PDF URL: PDF viewer -->
+                    <template v-else-if="readerItem.pdf_url">
+                        <iframe
+                            :src="`https://docs.google.com/gview?url=${encodeURIComponent(readerItem.pdf_url)}&embedded=true`"
+                            class="w-full h-full rounded-b-3xl"
+                            frameborder="0"
+                            allowfullscreen
+                            title="PDF Reader"
+                        />
+                    </template>
+
+                    <!-- External with URL only: landing page embed -->
+                    <template v-else-if="readerItem.url">
+                        <div class="flex flex-col items-center justify-center h-full space-y-6 p-8">
+                            <div class="w-20 h-20 rounded-full bg-indigo-50 flex items-center justify-center">
+                                <BookOpenText class="w-10 h-10 text-indigo-500" />
+                            </div>
+                            <div class="text-center space-y-2">
+                                <h4 class="font-bold text-slate-800 text-lg">Baca di Sumber Asli</h4>
+                                <p class="text-sm text-slate-500 max-w-sm">Artikel ini tidak memiliki PDF terbuka. Klik tombol di bawah untuk membacanya langsung di situs jurnal asli.</p>
+                            </div>
+                            <a
+                                :href="readerItem.url"
+                                target="_blank"
+                                class="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl shadow-lg transition text-sm"
+                            >
+                                <ExternalLink class="w-4 h-4" />
+                                Buka di Sumber Asli
+                            </a>
+                            <p class="text-xs text-slate-400">{{ readerItem.url }}</p>
+                        </div>
+                    </template>
                 </div>
             </div>
         </div>
