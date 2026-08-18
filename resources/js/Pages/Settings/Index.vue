@@ -118,28 +118,28 @@ const submit = () => {
                         <!-- Foto 1 -->
                         <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-2">
                             <label class="block font-bold text-slate-700 uppercase text-[10px]">Foto 1 (Kiri Atas)</label>
-                            <div class="h-28 rounded-xl bg-cover bg-center border border-slate-200" :style="{ backgroundImage: `url('${preview1 || getAssetUrl(props.settings.profile_photo_1) || 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=800&q=80'}')` }"></div>
+                            <div class="h-28 rounded-xl bg-contain bg-center bg-no-repeat bg-slate-100 border border-slate-200" :style="{ backgroundImage: `url('${preview1 || getAssetUrl(props.settings.profile_photo_1) || 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=800&q=80'}')` }"></div>
                             <input type="file" @change="(e) => handleFileChange(e, 'profile_photo_1', (url) => preview1 = url)" accept="image/*" class="w-full text-[10px] text-slate-500 file:mr-2 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-[10px] file:font-bold file:bg-blue-50 file:text-blue-600 hover:file:bg-blue-100" />
                         </div>
 
                         <!-- Foto 2 -->
                         <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-2">
                             <label class="block font-bold text-slate-700 uppercase text-[10px]">Foto 2 (Kiri Bawah)</label>
-                            <div class="h-28 rounded-xl bg-cover bg-center border border-slate-200" :style="{ backgroundImage: `url('${preview2 || getAssetUrl(props.settings.profile_photo_2) || 'https://images.unsplash.com/photo-1521587760476-6c12a4b040da?auto=format&fit=crop&w=800&q=80'}')` }"></div>
+                            <div class="h-28 rounded-xl bg-contain bg-center bg-no-repeat bg-slate-100 border border-slate-200" :style="{ backgroundImage: `url('${preview2 || getAssetUrl(props.settings.profile_photo_2) || 'https://images.unsplash.com/photo-1521587760476-6c12a4b040da?auto=format&fit=crop&w=800&q=80'}')` }"></div>
                             <input type="file" @change="(e) => handleFileChange(e, 'profile_photo_2', (url) => preview2 = url)" accept="image/*" class="w-full text-[10px] text-slate-500 file:mr-2 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-[10px] file:font-bold file:bg-blue-50 file:text-blue-600 hover:file:bg-blue-100" />
                         </div>
 
                         <!-- Foto 3 -->
                         <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-2">
                             <label class="block font-bold text-slate-700 uppercase text-[10px]">Foto 3 (Kanan Atas)</label>
-                            <div class="h-28 rounded-xl bg-cover bg-center border border-slate-200" :style="{ backgroundImage: `url('${preview3 || getAssetUrl(props.settings.profile_photo_3) || 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=800&q=80'}')` }"></div>
+                            <div class="h-28 rounded-xl bg-contain bg-center bg-no-repeat bg-slate-100 border border-slate-200" :style="{ backgroundImage: `url('${preview3 || getAssetUrl(props.settings.profile_photo_3) || 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=800&q=80'}')` }"></div>
                             <input type="file" @change="(e) => handleFileChange(e, 'profile_photo_3', (url) => preview3 = url)" accept="image/*" class="w-full text-[10px] text-slate-500 file:mr-2 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-[10px] file:font-bold file:bg-blue-50 file:text-blue-600 hover:file:bg-blue-100" />
                         </div>
 
                         <!-- Foto 4 -->
                         <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-2">
                             <label class="block font-bold text-slate-700 uppercase text-[10px]">Foto 4 (Kanan Bawah)</label>
-                            <div class="h-28 rounded-xl bg-cover bg-center border border-slate-200" :style="{ backgroundImage: `url('${preview4 || getAssetUrl(props.settings.profile_photo_4) || 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=800&q=80'}')` }"></div>
+                            <div class="h-28 rounded-xl bg-contain bg-center bg-no-repeat bg-slate-100 border border-slate-200" :style="{ backgroundImage: `url('${preview4 || getAssetUrl(props.settings.profile_photo_4) || 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=800&q=80'}')` }"></div>
                             <input type="file" @change="(e) => handleFileChange(e, 'profile_photo_4', (url) => preview4 = url)" accept="image/*" class="w-full text-[10px] text-slate-500 file:mr-2 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-[10px] file:font-bold file:bg-blue-50 file:text-blue-600 hover:file:bg-blue-100" />
                         </div>
                     </div>

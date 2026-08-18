@@ -266,14 +266,22 @@ const getFallbackUrl = (category) => {
             <div class="max-w-7xl mx-auto relative z-10">
                 <div class="flex flex-col lg:flex-row items-center gap-12">
                     <div class="w-full lg:w-1/2 reveal-on-scroll">
-                        <div class="grid grid-cols-2 gap-4">
+                        <div class="grid grid-cols-2 gap-4 items-start">
                             <div class="space-y-4">
-                                <div class="h-52 rounded-3xl bg-cover bg-center shadow-lg border-2 border-white transform hover:scale-105 transition-transform duration-300" :style="{ backgroundImage: `url('${getAssetUrl(settings.profile_photo_1) || 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=800&q=80'}')` }"></div>
-                                <div class="h-64 rounded-3xl bg-cover bg-center shadow-lg border-2 border-white transform hover:scale-105 transition-transform duration-300" :style="{ backgroundImage: `url('${getAssetUrl(settings.profile_photo_2) || 'https://images.unsplash.com/photo-1521587760476-6c12a4b040da?auto=format&fit=crop&w=800&q=80'}')` }"></div>
+                                <div class="overflow-hidden rounded-2xl">
+                                    <img :src="getAssetUrl(settings.profile_photo_1) || 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=800&q=80'" alt="Foto Profil 1" class="w-full h-auto object-contain transform hover:scale-[1.02] transition-transform duration-300" />
+                                </div>
+                                <div class="overflow-hidden rounded-2xl">
+                                    <img :src="getAssetUrl(settings.profile_photo_2) || 'https://images.unsplash.com/photo-1521587760476-6c12a4b040da?auto=format&fit=crop&w=800&q=80'" alt="Foto Profil 2" class="w-full h-auto object-contain transform hover:scale-[1.02] transition-transform duration-300" />
+                                </div>
                             </div>
-                            <div class="pt-10 space-y-4">
-                                <div class="h-64 rounded-3xl bg-cover bg-center shadow-lg border-2 border-white transform hover:scale-105 transition-transform duration-300" :style="{ backgroundImage: `url('${getAssetUrl(settings.profile_photo_3) || 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=800&q=80'}')` }"></div>
-                                <div class="h-52 rounded-3xl bg-cover bg-center shadow-lg border-2 border-white transform hover:scale-105 transition-transform duration-300" :style="{ backgroundImage: `url('${getAssetUrl(settings.profile_photo_4) || 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=800&q=80'}')` }"></div>
+                            <div class="space-y-4">
+                                <div class="overflow-hidden rounded-2xl">
+                                    <img :src="getAssetUrl(settings.profile_photo_3) || 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=800&q=80'" alt="Foto Profil 3" class="w-full h-auto object-contain transform hover:scale-[1.02] transition-transform duration-300" />
+                                </div>
+                                <div class="overflow-hidden rounded-2xl">
+                                    <img :src="getAssetUrl(settings.profile_photo_4) || 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=800&q=80'" alt="Foto Profil 4" class="w-full h-auto object-contain transform hover:scale-[1.02] transition-transform duration-300" />
+                                </div>
                             </div>
                         </div>
                     </div>
