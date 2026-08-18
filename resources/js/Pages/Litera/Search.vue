@@ -24,7 +24,10 @@ import {
     Lightbulb,
     Tag,
     BookMarked,
-    CheckCircle2
+    CheckCircle2,
+    Library,
+    MapPin,
+    Barcode
 } from 'lucide-vue-next';
 
 const props = defineProps({
@@ -620,15 +623,97 @@ const filteredItems = computed(() => {
 
                 <!-- Reader Body -->
                 <div class="flex-1 overflow-hidden rounded-b-3xl bg-slate-100">
-                    <!-- Local Book: Google Books iFrame embed -->
+                    <!-- Local Book: Digital Catalog Card UI (Fixes Google Books iFrame SameOrigin block) -->
                     <template v-if="readerItem.source_type === 'local'">
-                        <iframe
-                            :src="`https://books.google.com/books?${readerItem.isbn ? 'vid=ISBN' + readerItem.isbn : 'q=' + encodeURIComponent(readerItem.title)}&output=embed`"
-                            class="w-full h-full rounded-b-3xl"
-                            frameborder="0"
-                            allowfullscreen
-                            title="Google Books Preview"
-                        />
+                        <div class="h-full overflow-y-auto p-6 sm:p-8 space-y-6 bg-slate-50">
+                            <!-- Physical Availability & Location Banner -->
+                            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                                <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold">
+                                            <Library class="w-5 h-5 text-emerald-700" />
+                                        </div>
+                                        <div>
+                                            <span class="text-[10px] font-extrabold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">Koleksi Fisik Perpustakaan</span>
+                                            <h4 class="font-bold text-slate-900 text-sm mt-0.5">Informasi Lokasi & Stok Katalog</h4>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex items-center gap-2">
+                                        <span :class="[
+                                            'px-3 py-1 rounded-full text-xs font-black shadow-xs',
+                                            readerItem.stock > 0 ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-amber-100 text-amber-800 border border-amber-200'
+                                        ]">
+                                            {{ readerItem.stock > 0 ? '✓ Tersedia (' + readerItem.stock + ' Eksemplar)' : '⚠️ Sedang Dipinjam' }}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+                                    <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200/70 space-y-1">
+                                        <span class="text-slate-400 font-bold uppercase text-[10px] flex items-center gap-1">
+                                            <MapPin class="w-3.5 h-3.5 text-blue-600" />
+                                            <span>Lokasi Rak</span>
+                                        </span>
+                                        <p class="font-extrabold text-slate-900 text-sm">{{ readerItem.rack_name || '-' }}</p>
+                                    </div>
+
+                                    <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200/70 space-y-1">
+                                        <span class="text-slate-400 font-bold uppercase text-[10px] flex items-center gap-1">
+                                            <Barcode class="w-3.5 h-3.5 text-purple-600" />
+                                            <span>Nomor ISBN</span>
+                                        </span>
+                                        <p class="font-extrabold text-slate-900 text-sm">{{ readerItem.isbn || '-' }}</p>
+                                    </div>
+
+                                    <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200/70 space-y-1">
+                                        <span class="text-slate-400 font-bold uppercase text-[10px] flex items-center gap-1">
+                                            <BookOpen class="w-3.5 h-3.5 text-emerald-600" />
+                                            <span>Penerbit & Tahun</span>
+                                        </span>
+                                        <p class="font-extrabold text-slate-900 text-sm">{{ readerItem.publisher_or_journal || '-' }} ({{ readerItem.publication_year || 'N/A' }})</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Abstract / Description -->
+                            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+                                <h5 class="font-extrabold text-slate-900 text-sm flex items-center gap-2">
+                                    <BookOpenText class="w-4 h-4 text-blue-600" />
+                                    <span>Ringkasan & Sinopsis Buku</span>
+                                </h5>
+                                <p class="text-xs text-slate-700 leading-relaxed font-medium">
+                                    {{ readerItem.abstract || 'Belum ada ringkasan tertulis untuk buku ini. Silakan gunakan fitur Bedah Isi AI untuk menghasilkan analisis otomatis.' }}
+                                </p>
+                            </div>
+
+                            <!-- External Links & Actions -->
+                            <div class="bg-blue-50/70 p-6 rounded-2xl border border-blue-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+                                <div class="space-y-1 text-center sm:text-left">
+                                    <h5 class="font-extrabold text-blue-900 text-xs">Ingin Membaca Preview Digital?</h5>
+                                    <p class="text-[11px] text-blue-700 font-medium">Buka pratinjau cuplikan halaman resmi di Google Books melalui tab baru.</p>
+                                </div>
+
+                                <div class="flex items-center gap-3 shrink-0">
+                                    <button
+                                        @click="openAnalyzeModal(readerItem); isReaderModalOpen = false;"
+                                        class="px-4 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl text-xs shadow-md transition flex items-center gap-1.5"
+                                    >
+                                        <Sparkles class="w-4 h-4 text-white" />
+                                        <span>Bedah Isi AI</span>
+                                    </button>
+
+                                    <a
+                                        :href="getGoogleBooksUrl(readerItem)"
+                                        target="_blank"
+                                        class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs shadow-md transition flex items-center gap-2"
+                                    >
+                                        <ExternalLink class="w-4 h-4" />
+                                        <span>Buka Google Books Preview</span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
                     </template>
 
                     <!-- External with PDF URL: PDF viewer -->
