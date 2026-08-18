@@ -98,6 +98,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/books/{book}/update', [BookController::class, 'update'])->name('books.update');
         Route::delete('/books/{book}', [BookController::class, 'destroy'])->name('books.destroy');
         Route::post('/books/import-excel', [BookController::class, 'importExcel'])->name('books.import-excel');
+        Route::post('/books/batch-import-json', [BookController::class, 'batchImportJson'])->name('books.batch-import-json');
     });
 
     // Master Reference Books (Read for all, Create/Edit/Delete for Admin & Pustakawan)

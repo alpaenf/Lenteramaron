@@ -200,13 +200,99 @@ const deleteBook = (book) => {
     }
 };
 
-// Import Form
+// Import Form & Fast Client-side CSV Parser
 const importForm = useForm({
     file: null,
 });
 
-const submitImport = () => {
+const parsedCsvRows = ref([]);
+const isParsingCsv = ref(false);
+const isUploadingJson = ref(false);
+
+const handleFileSelect = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    importForm.file = file;
+    parsedCsvRows.value = [];
+
+    if (file.name.endsWith('.csv') || file.name.endsWith('.txt') || file.type.includes('csv')) {
+        isParsingCsv.value = true;
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+            try {
+                const text = evt.target.result;
+                const lines = text.split(/\r\n|\n/);
+                if (lines.length < 2) {
+                    isParsingCsv.value = false;
+                    return;
+                }
+
+                const parseCsvLine = (line) => {
+                    const result = [];
+                    let cell = '';
+                    let inQuotes = false;
+                    for (let i = 0; i < line.length; i++) {
+                        const char = line[i];
+                        if (char === '"') {
+                            inQuotes = !inQuotes;
+                        } else if (char === ',' && !inQuotes) {
+                            result.push(cell.trim());
+                            cell = '';
+                        } else {
+                            cell += char;
+                        }
+                    }
+                    result.push(cell.trim());
+                    return result;
+                };
+
+                const headers = parseCsvLine(lines[0]);
+                const rows = [];
+                const maxRows = Math.min(lines.length, 301);
+
+                for (let i = 1; i < maxRows; i++) {
+                    if (!lines[i] || !lines[i].trim()) continue;
+                    const values = parseCsvLine(lines[i]);
+                    const rowObj = {};
+                    headers.forEach((h, idx) => {
+                        rowObj[h] = values[idx] || '';
+                    });
+                    rows.push(rowObj);
+                }
+
+                parsedCsvRows.value = rows;
+            } catch (err) {
+                console.error('CSV Parsing Error:', err);
+            } finally {
+                isParsingCsv.value = false;
+            }
+        };
+        reader.readAsText(file.slice(0, 1024 * 1024));
+    }
+};
+
+const submitImport = async () => {
+    if (parsedCsvRows.value.length > 0) {
+        isUploadingJson.value = true;
+        try {
+            const res = await axios.post('/books/batch-import-json', { rows: parsedCsvRows.value });
+            if (res.data.success) {
+                alert(res.data.message || 'Berhasil mengimpor data buku.');
+                isImportOpen.value = false;
+                importForm.reset();
+                parsedCsvRows.value = [];
+                router.reload({ preserveScroll: true });
+            }
+        } catch (err) {
+            alert('Gagal mengimpor data: ' + (err.response?.data?.message || err.message));
+        } finally {
+            isUploadingJson.value = false;
+        }
+        return;
+    }
+
     importForm.post('/books/import-excel', {
+        preserveScroll: true,
         onSuccess: () => {
             isImportOpen.value = false;
             importForm.reset();
@@ -550,14 +636,15 @@ const submitBatchIsbn = async () => {
                         </div>
 
                         <!-- Processing & Live Percentage Progress Bar -->
-                        <div v-if="importForm.processing" class="p-5 text-center text-slate-700 space-y-3 bg-blue-50/90 rounded-2xl border border-blue-200">
+                        <div v-if="importForm.processing || isUploadingJson" class="p-5 text-center text-slate-700 space-y-3 bg-blue-50/90 rounded-2xl border border-blue-200">
                             <Loader2 class="w-8 h-8 text-blue-600 animate-spin mx-auto" />
                             <div>
                                 <p class="font-extrabold text-sm text-blue-950">
                                     Sedang Memproses &amp; Mengimpor Dataset... 
                                     <span v-if="importForm.progress" class="text-blue-600 font-mono text-xs ml-1">({{ importForm.progress.percentage }}%)</span>
+                                    <span v-else-if="parsedCsvRows.length" class="text-blue-600 font-mono text-xs ml-1">({{ parsedCsvRows.length }} Baris)</span>
                                 </p>
-                                <p class="text-[11px] text-slate-600 mt-0.5 font-medium">Mohon tunggu sebentar, sistem sedang membaca dan menyimpan data ke database (maksimal 500 baris per batch).</p>
+                                <p class="text-[11px] text-slate-600 mt-0.5 font-medium">Mohon tunggu sebentar, sistem sedang membaca dan menyimpan data langsung ke database.</p>
                             </div>
 
                             <!-- Animated Live Progress Bar -->
@@ -569,20 +656,25 @@ const submitBatchIsbn = async () => {
                             </div>
                         </div>
 
-                        <div v-else>
+                        <div v-else class="space-y-2">
                             <label class="block font-bold text-slate-700 uppercase mb-1">Pilih File Dataset (.csv / .xlsx)</label>
-                            <input @change="e => importForm.file = e.target.files[0]" type="file" required accept=".xlsx,.xls,.csv,.txt" class="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:bg-blue-600 file:text-white font-bold cursor-pointer" />
+                            <input @change="handleFileSelect" type="file" required accept=".xlsx,.xls,.csv,.txt" class="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:bg-blue-600 file:text-white font-bold cursor-pointer" />
+                            
+                            <div v-if="parsedCsvRows.length > 0" class="p-2.5 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-[11px] font-medium flex items-center justify-between">
+                                <span>✓ Siap mengimpor {{ parsedCsvRows.length }} baris buku secara instan</span>
+                                <span class="font-mono text-[10px] bg-emerald-200/60 px-2 py-0.5 rounded-full">JSON Fast Mode</span>
+                            </div>
                         </div>
 
                         <div class="pt-2 flex justify-end gap-3">
-                            <button type="button" :disabled="importForm.processing" @click="isImportOpen = false" class="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 font-bold disabled:opacity-50">Batal</button>
+                            <button type="button" :disabled="importForm.processing || isUploadingJson" @click="isImportOpen = false" class="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 font-bold disabled:opacity-50">Batal</button>
                             <button 
-                                :disabled="importForm.processing || !importForm.file" 
+                                :disabled="importForm.processing || isUploadingJson || !importForm.file" 
                                 type="submit" 
                                 class="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-extrabold shadow-md shadow-blue-500/20 transition flex items-center justify-center gap-2 cursor-pointer"
                             >
-                                <Loader2 v-if="importForm.processing" class="w-4 h-4 text-white animate-spin shrink-0" />
-                                <span>{{ importForm.processing ? `Mengunggah ${importForm.progress ? importForm.progress.percentage + '%' : '...'}` : 'Mulai Import Data' }}</span>
+                                <Loader2 v-if="importForm.processing || isUploadingJson" class="w-4 h-4 text-white animate-spin shrink-0" />
+                                <span>{{ (importForm.processing || isUploadingJson) ? `Memproses Impor...` : 'Mulai Import Data' }}</span>
                             </button>
                         </div>
                     </form>

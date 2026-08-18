@@ -158,4 +158,71 @@ class BookController extends Controller
             return redirect()->route('books.index')->with('error', 'Gagal mengimpor file: ' . $e->getMessage());
         }
     }
+
+    public function batchImportJson(Request $request)
+    {
+        $request->validate([
+            'rows' => 'required|array|min:1|max:1000',
+        ]);
+
+        $rows = $request->input('rows');
+        $importedCount = 0;
+
+        foreach ($rows as $row) {
+            if (!is_array($row)) continue;
+
+            $cleanRow = [];
+            foreach ($row as $k => $v) {
+                $cleanKey = strtolower(preg_replace('/[^a-zA-Z0-9_]/', '', str_replace(['-', ' '], '_', (string)$k)));
+                $cleanRow[$cleanKey] = $v;
+            }
+
+            $title = $cleanRow['judul_buku'] ?? $cleanRow['judul'] ?? $cleanRow['title'] ?? $cleanRow['book_title'] ?? $cleanRow['booktitle'] ?? null;
+            if (empty($title)) continue;
+
+            $isbn = $cleanRow['isbn'] ?? $cleanRow['isbn13'] ?? $cleanRow['isbn10'] ?? $cleanRow['book_isbn'] ?? null;
+            $author = $cleanRow['pengarang'] ?? $cleanRow['author'] ?? $cleanRow['authors'] ?? $cleanRow['book_author'] ?? 'Penulis Referensi';
+            $publisher = $cleanRow['penerbit'] ?? $cleanRow['publisher'] ?? 'Penerbit Umum';
+
+            $yearRaw = $cleanRow['tahun'] ?? $cleanRow['year'] ?? $cleanRow['published_year'] ?? $cleanRow['publishedyear'] ?? $cleanRow['year_of_publication'] ?? date('Y');
+            $year = (int) preg_replace('/[^0-9]/', '', (string)$yearRaw);
+            if ($year < 1900 || $year > ((int)date('Y') + 2)) {
+                $year = (int) date('Y');
+            }
+
+            $rawCat = $cleanRow['kategori'] ?? $cleanRow['category'] ?? $cleanRow['categories'] ?? 'Karya Umum & Komputer';
+            $categoryName = trim(explode(',', (string)$rawCat)[0]);
+            if (empty($categoryName)) $categoryName = 'Karya Umum & Komputer';
+
+            $category = BookCategory::firstOrCreate(
+                ['name' => $categoryName],
+                ['code' => (string) rand(100, 999), 'description' => 'Kategori Referensi Import']
+            );
+
+            $code = $cleanRow['kode_buku'] ?? $cleanRow['book_code'] ?? ('BK-' . sprintf('%04d', rand(1000, 9999)));
+            $cover = $cleanRow['cover'] ?? $cleanRow['image_url_l'] ?? $cleanRow['image_url_m'] ?? $cleanRow['thumbnail'] ?? null;
+            $description = $cleanRow['deskripsi'] ?? $cleanRow['description'] ?? $cleanRow['abstract'] ?? null;
+
+            Book::create([
+                'book_code'   => trim((string)$code),
+                'isbn'        => $isbn ? trim((string)$isbn) : null,
+                'title'       => trim((string)$title),
+                'author'      => trim((string)$author),
+                'publisher'   => trim((string)$publisher),
+                'year'        => $year,
+                'category_id' => $category->id,
+                'shelf'       => 'Rak Referensi',
+                'stock'       => 5,
+                'cover'       => $cover ? trim((string)$cover) : null,
+                'description' => $description ? trim((string)$description) : null,
+            ]);
+
+            $importedCount++;
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => "Berhasil mengimpor {$importedCount} data buku ke katalog referensi.",
+        ]);
+    }
 }
