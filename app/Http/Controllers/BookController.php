@@ -167,9 +167,10 @@ class BookController extends Controller
 
         $rows = $request->input('rows');
         $importedCount = 0;
+        $skippedCount = 0;
 
-        foreach ($rows as $row) {
-            if (!is_array($row)) continue;
+        foreach ($rows as $index => $row) {
+            if (!is_array($row)) { $skippedCount++; continue; }
 
             $cleanRow = [];
             foreach ($row as $k => $v) {
@@ -178,7 +179,7 @@ class BookController extends Controller
             }
 
             $title = $cleanRow['judul_buku'] ?? $cleanRow['judul'] ?? $cleanRow['title'] ?? $cleanRow['book_title'] ?? $cleanRow['booktitle'] ?? null;
-            if (empty($title)) continue;
+            if (empty($title)) { $skippedCount++; continue; }
 
             $isbn = $cleanRow['isbn'] ?? $cleanRow['isbn13'] ?? $cleanRow['isbn10'] ?? $cleanRow['book_isbn'] ?? null;
             $author = $cleanRow['pengarang'] ?? $cleanRow['author'] ?? $cleanRow['authors'] ?? $cleanRow['book_author'] ?? 'Penulis Referensi';
@@ -193,36 +194,56 @@ class BookController extends Controller
             $rawCat = $cleanRow['kategori'] ?? $cleanRow['category'] ?? $cleanRow['categories'] ?? 'Karya Umum & Komputer';
             $categoryName = trim(explode(',', (string)$rawCat)[0]);
             if (empty($categoryName)) $categoryName = 'Karya Umum & Komputer';
+            $categoryName = mb_substr($categoryName, 0, 100);
 
-            $category = BookCategory::firstOrCreate(
-                ['name' => $categoryName],
-                ['code' => (string) rand(100, 999), 'description' => 'Kategori Referensi Import']
-            );
+            try {
+                $category = BookCategory::firstOrCreate(
+                    ['name' => $categoryName],
+                    ['code' => strtoupper(substr(preg_replace('/[^a-zA-Z0-9]/', '', $categoryName), 0, 10)) . rand(10, 99), 'description' => 'Kategori Import Otomatis']
+                );
+            } catch (\Throwable $e) {
+                $category = BookCategory::first();
+                if (!$category) { $skippedCount++; continue; }
+            }
 
-            $code = $cleanRow['kode_buku'] ?? $cleanRow['book_code'] ?? ('BK-' . sprintf('%04d', rand(1000, 9999)));
-            $cover = $cleanRow['cover'] ?? $cleanRow['image_url_l'] ?? $cleanRow['image_url_m'] ?? $cleanRow['thumbnail'] ?? null;
+            // Generate unique book_code using microseconds + index
+            $existingCode = $cleanRow['kode_buku'] ?? $cleanRow['book_code'] ?? null;
+            $code = $existingCode
+                ? mb_substr(trim((string)$existingCode), 0, 50)
+                : ('BK-' . strtoupper(base_convert((int)(microtime(true) * 1000) + $index, 10, 36)));
+
+            // Ensure uniqueness if code already exists
+            if (\App\Models\Book::where('book_code', $code)->exists()) {
+                $code = 'BK-' . strtoupper(base_convert(intval(microtime(true) * 10000) + rand(1, 999) + $index, 10, 36));
+            }
+
+            $cover = $cleanRow['cover'] ?? $cleanRow['image_url_l'] ?? $cleanRow['image_url_m'] ?? $cleanRow['image_url_s'] ?? $cleanRow['thumbnail'] ?? null;
             $description = $cleanRow['deskripsi'] ?? $cleanRow['description'] ?? $cleanRow['abstract'] ?? null;
 
-            Book::create([
-                'book_code'   => trim((string)$code),
-                'isbn'        => $isbn ? trim((string)$isbn) : null,
-                'title'       => trim((string)$title),
-                'author'      => trim((string)$author),
-                'publisher'   => trim((string)$publisher),
-                'year'        => $year,
-                'category_id' => $category->id,
-                'shelf'       => 'Rak Referensi',
-                'stock'       => 5,
-                'cover'       => $cover ? trim((string)$cover) : null,
-                'description' => $description ? trim((string)$description) : null,
-            ]);
-
-            $importedCount++;
+            try {
+                Book::create([
+                    'book_code'   => mb_substr($code, 0, 50),
+                    'isbn'        => $isbn ? mb_substr(trim((string)$isbn), 0, 30) : null,
+                    'title'       => mb_substr(trim((string)$title), 0, 255),
+                    'author'      => mb_substr(trim((string)$author), 0, 255),
+                    'publisher'   => mb_substr(trim((string)$publisher), 0, 255),
+                    'year'        => $year,
+                    'category_id' => $category->id,
+                    'shelf'       => 'Rak Referensi',
+                    'stock'       => 5,
+                    'cover'       => $cover ? mb_substr(trim((string)$cover), 0, 500) : null,
+                    'description' => $description ? mb_substr(trim((string)$description), 0, 3000) : null,
+                ]);
+                $importedCount++;
+            } catch (\Throwable $e) {
+                // Skip duplicate or malformed rows gracefully
+                $skippedCount++;
+            }
         }
 
         return response()->json([
             'success' => true,
-            'message' => "Berhasil mengimpor {$importedCount} data buku ke katalog referensi.",
+            'message' => "Berhasil mengimpor {$importedCount} buku ke katalog referensi." . ($skippedCount > 0 ? " ({$skippedCount} baris dilewati karena duplikat/kosong)" : ''),
         ]);
     }
 }
