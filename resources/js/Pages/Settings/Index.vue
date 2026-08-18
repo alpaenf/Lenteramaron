@@ -34,6 +34,7 @@ const form = useForm({
 const getAssetUrl = (path) => {
     if (!path) return null;
     if (path.startsWith('http')) return path;
+    if (path.startsWith('/')) return path;
     if (path.startsWith('uploads/')) return '/' + path;
     return '/files-media/' + path;
 };
@@ -50,6 +51,16 @@ const submit = () => {
     form.post('/settings', {
         preserveScroll: true,
         forceFormData: true,
+        onSuccess: () => {
+            preview1.value = null;
+            preview2.value = null;
+            preview3.value = null;
+            preview4.value = null;
+            form.profile_photo_1 = null;
+            form.profile_photo_2 = null;
+            form.profile_photo_3 = null;
+            form.profile_photo_4 = null;
+        },
     });
 };
 </script>

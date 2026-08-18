@@ -35,24 +35,40 @@ Route::get('/files-media/{path}', function ($path) {
     $cleanPath = str_replace('..', '', $path);
     $cleanPath = ltrim($cleanPath, '/');
     
-    // Check in public/uploads first
-    $publicUploadPath = public_path('uploads/' . $cleanPath);
-    if (file_exists($publicUploadPath) && is_file($publicUploadPath)) {
-        $mimeType = @mime_content_type($publicUploadPath) ?: 'image/jpeg';
-        return response(file_get_contents($publicUploadPath), 200, [
-            'Content-Type' => $mimeType,
-            'Cache-Control' => 'no-cache, must-revalidate',
-        ]);
+    // Strip redundant leading "uploads/" if passed in path
+    $subPath = preg_replace('#^uploads/#', '', $cleanPath);
+
+    // 1. Check in public/uploads/ (with subPath or cleanPath)
+    foreach ([$cleanPath, $subPath] as $p) {
+        $publicUploadPath = public_path('uploads/' . $p);
+        if (file_exists($publicUploadPath) && is_file($publicUploadPath)) {
+            $mimeType = @mime_content_type($publicUploadPath) ?: 'image/jpeg';
+            return response(file_get_contents($publicUploadPath), 200, [
+                'Content-Type' => $mimeType,
+                'Cache-Control' => 'public, max-age=86400',
+            ]);
+        }
+        
+        $directPublic = public_path($p);
+        if (file_exists($directPublic) && is_file($directPublic)) {
+            $mimeType = @mime_content_type($directPublic) ?: 'image/jpeg';
+            return response(file_get_contents($directPublic), 200, [
+                'Content-Type' => $mimeType,
+                'Cache-Control' => 'public, max-age=86400',
+            ]);
+        }
     }
 
-    // Check in storage/app/public
-    $storagePath = storage_path('app/public/' . $cleanPath);
-    if (file_exists($storagePath) && is_file($storagePath)) {
-        $mimeType = @mime_content_type($storagePath) ?: 'image/jpeg';
-        return response(file_get_contents($storagePath), 200, [
-            'Content-Type' => $mimeType,
-            'Cache-Control' => 'no-cache, must-revalidate',
-        ]);
+    // 2. Check in storage/app/public
+    foreach ([$cleanPath, $subPath] as $p) {
+        $storagePath = storage_path('app/public/' . $p);
+        if (file_exists($storagePath) && is_file($storagePath)) {
+            $mimeType = @mime_content_type($storagePath) ?: 'image/jpeg';
+            return response(file_get_contents($storagePath), 200, [
+                'Content-Type' => $mimeType,
+                'Cache-Control' => 'public, max-age=86400',
+            ]);
+        }
     }
 
     abort(404);

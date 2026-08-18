@@ -130,6 +130,7 @@ const submitGuestForm = () => {
 const getAssetUrl = (path) => {
     if (!path) return null;
     if (path.startsWith('http://') || path.startsWith('https://')) return path;
+    if (path.startsWith('/')) return path;
     if (path.startsWith('uploads/')) return `/${path}`;
     return `/files-media/${path}`;
 };
