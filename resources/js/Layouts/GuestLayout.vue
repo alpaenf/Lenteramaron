@@ -1,17 +1,21 @@
 <script setup>
 import { Link, usePage } from '@inertiajs/vue3';
 import { ref, computed } from 'vue';
-import { CheckCircle, AlertCircle, Sparkles, BookOpen } from 'lucide-vue-next';
+import { CheckCircle, AlertCircle, Sparkles, BookOpen, HelpCircle } from 'lucide-vue-next';
+import SplashScreen from '@/Components/SplashScreen.vue';
 
 const page = usePage();
 const settings = computed(() => page.props.settings || page.props.app_settings || {});
 const flash = computed(() => page.props.flash || {});
 
 const mobileMenuOpen = ref(false);
+const showSplashModal = ref(false);
 </script>
 
 <template>
     <div class="min-h-screen flex flex-col bg-surface text-on-surface font-sans selection:bg-primary selection:text-on-primary">
+        <!-- Interactive 3-Slide Splash Screen Onboarding -->
+        <SplashScreen :show="showSplashModal" @close="showSplashModal = false" />
         <!-- Toast Notification Flash -->
         <div v-if="flash.success" class="fixed top-24 right-5 z-[60] flex items-center gap-3 bg-secondary text-on-secondary px-5 py-3.5 rounded-xl shadow-xl animate-bounce">
             <CheckCircle class="w-5 h-5 shrink-0" />
@@ -131,7 +135,7 @@ const mobileMenuOpen = ref(false);
                         <ul class="space-y-2 text-sm text-slate-400">
                             <li><a class="hover:text-blue-400 transition-colors" href="#profil">Profil Platform</a></li>
                             <li><a class="hover:text-blue-400 transition-colors" href="#layanan">Layanan AI</a></li>
-                            <li><a class="hover:text-blue-400 transition-colors" href="#galeri">Galeri Activities</a></li>
+                            <li><button @click="showSplashModal = true" class="hover:text-blue-400 transition-colors text-left flex items-center gap-1 cursor-pointer"><HelpCircle class="w-3.5 h-3.5 text-blue-400" /> <span>Panduan Splash Intro (1-3)</span></button></li>
                         </ul>
                     </div>
                 </div>
