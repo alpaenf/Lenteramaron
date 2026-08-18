@@ -263,7 +263,7 @@ const filteredItems = computed(() => {
             </div>
         </template>
 
-        <div class="py-8 bg-slate-50 min-h-screen">
+        <div :class="['bg-slate-50 min-h-screen', isAuthenticated ? 'py-8' : 'pt-24 pb-8']">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
 
                 <!-- Toast Notification -->

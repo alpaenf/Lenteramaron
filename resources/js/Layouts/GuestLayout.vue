@@ -101,7 +101,7 @@ const mobileMenuOpen = ref(false);
         </header>
 
         <!-- Main Content -->
-        <main class="pt-20 flex-grow">
+        <main class="flex-grow">
             <slot />
         </main>
 

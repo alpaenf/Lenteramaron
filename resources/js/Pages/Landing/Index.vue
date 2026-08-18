@@ -179,7 +179,7 @@ const getFallbackUrl = (category) => {
 <template>
     <GuestLayout>
         <!-- Hero Section -->
-        <section class="relative min-h-[85vh] flex items-center overflow-hidden px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-blue-50/60 via-slate-50 to-white pt-12 pb-16 lg:pt-14 lg:pb-20">
+        <section class="relative min-h-[85vh] flex items-center overflow-hidden px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-blue-50/60 via-slate-50 to-white pt-28 pb-16 lg:pt-32 lg:pb-20">
             <!-- Background Decorative Soft Glowing Orbs -->
             <div class="absolute -top-24 -left-24 w-96 h-96 bg-blue-400/10 rounded-full blur-3xl pointer-events-none"></div>
             <div class="absolute top-1/2 right-10 w-80 h-80 bg-emerald-400/10 rounded-full blur-3xl pointer-events-none"></div>
