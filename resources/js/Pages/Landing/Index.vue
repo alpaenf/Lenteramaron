@@ -253,7 +253,7 @@ const getFallbackUrl = (category) => {
                         <div class="rounded-[40px] overflow-hidden border-4 border-white shadow-2xl shadow-blue-900/10 bg-white aspect-[4/3]">
                             <img class="w-full h-full object-cover transform hover:scale-105 transition-transform duration-700" 
                                  alt="LITERA AI Research Navigator Platform" 
-                                 :src="settings.hero_banner_path ? '/files-media/' + settings.hero_banner_path : '/images/hero.png'"/>
+                                 :src="settings.hero_banner_path ? '/files-media/' + settings.hero_banner_path : '/images/hero1.png'"/>
                         </div>
 
                         <!-- Floating Badge Widget (Bottom Right) -->

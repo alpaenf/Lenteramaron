@@ -50,7 +50,7 @@ const submit = () => {
 
                     <!-- Featured Image Card -->
                     <div class="w-full max-w-xs aspect-video rounded-2xl overflow-hidden shadow-lg border-2 border-white/20 transform -rotate-1 hover:rotate-0 transition-transform duration-500">
-                        <img src="/images/hero.png" alt="LITERA Platform" class="w-full h-full object-cover" />
+                        <img src="/images/hero1.png" alt="LITERA Platform" class="w-full h-full object-cover" />
                     </div>
                 </div>
             </section>
