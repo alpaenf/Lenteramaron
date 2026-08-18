@@ -137,6 +137,9 @@ class GroqService
             Log::warning("LLM API Explain Relevance Warning: " . $e->getMessage());
         }
 
+        return $this->fallbackExplainRelevance($query, $title, $type);
+    }
+
     /**
      * Deeply analyze the content structure and insights of a book/paper reference.
      */
@@ -315,6 +318,8 @@ class GroqService
                 'recommended_source_title' => 'Sintesis Literatur LITERA',
             ],
         ];
+    }
+
     protected function fallbackAnalyzeContent(string $title, string $abstract, string $query): array
     {
         return [
