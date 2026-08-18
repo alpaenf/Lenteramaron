@@ -39,7 +39,7 @@ Route::get('/files-media/{path}', function ($path) {
     $subPath = preg_replace('#^uploads/#', '', $cleanPath);
 
     // 1. Check in public/uploads/ (with subPath or cleanPath)
-    foreach ([$cleanPath, $subPath] as $p) {
+    foreach ([$cleanPath, $subPath, 'settings/' . $subPath, 'books/' . $subPath, 'galleries/' . $subPath] as $p) {
         $publicUploadPath = public_path('uploads/' . $p);
         if (file_exists($publicUploadPath) && is_file($publicUploadPath)) {
             $mimeType = @mime_content_type($publicUploadPath) ?: 'image/jpeg';
@@ -65,6 +65,25 @@ Route::get('/files-media/{path}', function ($path) {
         if (file_exists($storagePath) && is_file($storagePath)) {
             $mimeType = @mime_content_type($storagePath) ?: 'image/jpeg';
             return response(file_get_contents($storagePath), 200, [
+                'Content-Type' => $mimeType,
+                'Cache-Control' => 'public, max-age=86400',
+            ]);
+        }
+    }
+
+    abort(404);
+})->where('path', '.*');
+
+Route::get('/uploads/{path}', function ($path) {
+    $cleanPath = str_replace('..', '', $path);
+    $cleanPath = ltrim($cleanPath, '/');
+    $subPath = preg_replace('#^uploads/#', '', $cleanPath);
+
+    foreach ([$cleanPath, $subPath, 'settings/' . $subPath, 'books/' . $subPath, 'galleries/' . $subPath] as $p) {
+        $full = public_path('uploads/' . $p);
+        if (file_exists($full) && is_file($full)) {
+            $mimeType = @mime_content_type($full) ?: 'image/jpeg';
+            return response(file_get_contents($full), 200, [
                 'Content-Type' => $mimeType,
                 'Cache-Control' => 'public, max-age=86400',
             ]);

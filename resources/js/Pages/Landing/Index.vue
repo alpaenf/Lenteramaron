@@ -129,10 +129,13 @@ const submitGuestForm = () => {
 // Universal helper: resolves the correct public URL for any uploaded asset
 const getAssetUrl = (path) => {
     if (!path) return null;
-    if (path.startsWith('http://') || path.startsWith('https://')) return path;
-    if (path.startsWith('/')) return path;
-    if (path.startsWith('uploads/')) return `/${path}`;
-    return `/files-media/${path}`;
+    if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('blob:')) return path;
+    const clean = path.replace(/^\/+/, '');
+    if (clean.startsWith('uploads/')) return '/' + clean;
+    if (clean.startsWith('settings/') || clean.startsWith('books/') || clean.startsWith('galleries/')) {
+        return '/uploads/' + clean;
+    }
+    return '/uploads/settings/' + clean;
 };
 
 const seederFallbackImages = {
