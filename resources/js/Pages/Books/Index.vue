@@ -1,7 +1,8 @@
 <script setup>
-import { ref } from 'vue';
-import { useForm, router } from '@inertiajs/vue3';
+import { ref, computed } from 'vue';
+import { useForm, router, usePage } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import axios from 'axios';
 import { 
     BookMarked, 
     Plus, 
@@ -14,7 +15,9 @@ import {
     BookOpen,
     Filter,
     Check,
-    PenTool
+    PenTool,
+    Sparkles,
+    Loader2
 } from 'lucide-vue-next';
 
 const props = defineProps({
@@ -22,6 +25,51 @@ const props = defineProps({
     categories: Array,
     filters: Object,
 });
+
+const page = usePage();
+const isAdmin = computed(() => {
+    const r = (page.props.auth?.user?.role || '').toLowerCase();
+    return ['admin', 'pustakawan', 'kepala_sekolah'].includes(r);
+});
+
+const isEnriching = ref(false);
+const enrichStatus = ref('');
+
+// Read Book Detail Modal State
+const selectedReadBook = ref(null);
+const isReadModalOpen = ref(false);
+
+const openReadModal = (book) => {
+    selectedReadBook.value = book;
+    isReadModalOpen.value = true;
+};
+
+const handleIsbnEnrich = async () => {
+    if (!form.isbn || form.isbn.trim().length < 5) {
+        alert('Masukkan nomor ISBN terlebih dahulu.');
+        return;
+    }
+
+    isEnriching.value = true;
+    enrichStatus.value = '';
+    try {
+        const res = await axios.post('/books/enrich-by-isbn', { isbn: form.isbn });
+        if (res.data.success && res.data.data) {
+            const d = res.data.data;
+            if (d.title) form.title = d.title;
+            if (d.author) form.author = d.author;
+            if (d.publisher) form.publisher = d.publisher;
+            if (d.publication_year) form.year = d.publication_year;
+            if (d.description) form.description = d.description;
+            if (d.cover_url) coverPreview.value = d.cover_url;
+            enrichStatus.value = `✓ Berhasil mengambil data dari ${d.source || 'Open Library'}`;
+        }
+    } catch (e) {
+        enrichStatus.value = '❌ Metadata ISBN tidak ditemukan.';
+    } finally {
+        isEnriching.value = false;
+    }
+};
 
 const search = ref(props.filters.search || '');
 const categoryId = ref(props.filters.category_id || '');
@@ -138,9 +186,6 @@ const submitUpdate = () => {
     router.post(`/books/${editingBook.value.id}/update`, formData, {
         forceFormData: true,
         onSuccess: () => {
-            if (editingBook.value) {
-                failedCovers.value.delete(editingBook.value.id);
-            }
             isEditOpen.value = false;
             editingBook.value = null;
             form.reset();
@@ -168,6 +213,88 @@ const submitImport = () => {
         },
     });
 };
+
+// Live Web Search Import Modal
+const isWebSearchOpen = ref(false);
+const webSearchQuery = ref('');
+const webSearchResults = ref([]);
+const isSearchingWeb = ref(false);
+const hasSearchedWeb = ref(false);
+const importingItemTitle = ref('');
+
+const searchWebBooks = async () => {
+    if (!webSearchQuery.value || webSearchQuery.value.trim().length < 2) return;
+    isSearchingWeb.value = true;
+    hasSearchedWeb.value = true;
+    try {
+        const res = await axios.post('/books/search-web', { q: webSearchQuery.value });
+        webSearchResults.value = res.data.results || [];
+    } catch (e) {
+        alert('Gagal mencari di web.');
+    } finally {
+        isSearchingWeb.value = false;
+    }
+};
+
+const importWebBook = async (book) => {
+    importingItemTitle.value = book.title;
+    try {
+        const formData = new FormData();
+        formData.append('book_code', 'BK-' + Math.random().toString(36).substring(2, 8).toUpperCase());
+        formData.append('isbn', book.isbn || '');
+        formData.append('title', book.title);
+        formData.append('author', book.author || 'Tanpa Pengarang');
+        formData.append('publisher', book.publisher || '-');
+        formData.append('year', book.publication_year || new Date().getFullYear());
+        if (props.categories && props.categories[0]) {
+            formData.append('category_id', props.categories[0].id);
+        }
+        formData.append('shelf', 'Rak Referensi');
+        formData.append('stock', 1);
+        formData.append('description', book.description || '');
+        if (book.cover_url) {
+            formData.append('cover_url', book.cover_url);
+        }
+
+        router.post('/books', formData, {
+            preserveScroll: true,
+            onSuccess: () => {
+                alert(`✓ Buku "${book.title}" berhasil ditambahkan ke katalog referensi!`);
+                isWebSearchOpen.value = false;
+            },
+            onError: (errors) => {
+                alert('Gagal mengimpor buku. ' + Object.values(errors).flat().join(', '));
+            }
+        });
+    } catch (e) {
+        alert('Gagal mengimpor buku.');
+    } finally {
+        importingItemTitle.value = '';
+    }
+};
+
+// Batch ISBN Import Modal
+const isBatchIsbnOpen = ref(false);
+const batchIsbnText = ref('');
+const isBatchImporting = ref(false);
+
+const submitBatchIsbn = async () => {
+    if (!batchIsbnText.value.trim()) return;
+    isBatchImporting.value = true;
+    try {
+        const res = await axios.post('/books/batch-import-isbn', { isbns: batchIsbnText.value });
+        if (res.data.success) {
+            alert(res.data.message);
+            isBatchIsbnOpen.value = false;
+            batchIsbnText.value = '';
+            router.reload();
+        }
+    } catch (e) {
+        alert('Gagal memproses impor batch ISBN.');
+    } finally {
+        isBatchImporting.value = false;
+    }
+};
 </script>
 
 <template>
@@ -179,7 +306,15 @@ const submitImport = () => {
                     <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Master Data Buku</h1>
                     <p class="text-xs text-slate-500 mt-1">Kelola katalog koleksi buku, stok exemplar, dan lokasi rak penyimpanan.</p>
                 </div>
-                <div class="flex flex-wrap items-center gap-3">
+                <div v-if="isAdmin" class="flex flex-wrap items-center gap-3">
+                    <button @click="isWebSearchOpen = true" class="px-4 py-2.5 rounded-xl border border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100 text-xs font-extrabold transition-all flex items-center gap-2">
+                        <Sparkles class="w-4 h-4 text-amber-500" />
+                        <span>Cari &amp; Tambah dari Web</span>
+                    </button>
+                    <button @click="isBatchIsbnOpen = true" class="px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 text-xs font-bold transition-all flex items-center gap-2">
+                        <BookMarked class="w-4 h-4 text-blue-600" />
+                        <span>Import Batch ISBN</span>
+                    </button>
                     <a href="/books/export-excel" target="_blank" class="px-4 py-2.5 rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 text-xs font-bold transition-all flex items-center gap-2">
                         <FileSpreadsheet class="w-4 h-4" />
                         <span>Export Excel</span>
@@ -190,7 +325,7 @@ const submitImport = () => {
                     </button>
                     <button @click="openCreateModal" class="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-all shadow-md shadow-blue-500/20 flex items-center gap-2">
                         <Plus class="w-4 h-4" />
-                        <span>Tambah Buku</span>
+                        <span>Tambah Manual</span>
                     </button>
                 </div>
             </div>
@@ -221,12 +356,12 @@ const submitImport = () => {
                     <table class="w-full text-left border-collapse">
                         <thead>
                             <tr class="bg-slate-50 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                                <th class="p-4">Cover & Kode</th>
-                                <th class="p-4">Judul & Pengarang</th>
+                                <th class="p-4">Cover &amp; Kode</th>
+                                <th class="p-4">Judul &amp; Pengarang</th>
                                 <th class="p-4">Kategori DDC</th>
-                                <th class="p-4">Penerbit & Tahun</th>
-                                <th class="p-4">Rak & Stok</th>
-                                <th class="p-4 text-right">Aksi</th>
+                                <th class="p-4">Penerbit &amp; Tahun</th>
+                                <th class="p-4">Akses Referensi</th>
+                                <th v-if="isAdmin" class="p-4 text-right">Aksi</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100 text-xs">
@@ -235,7 +370,7 @@ const submitImport = () => {
                                     <div class="flex items-center gap-3">
                                         <div class="w-10 h-14 bg-slate-100 rounded-lg overflow-hidden shrink-0 flex items-center justify-center text-slate-400 border border-slate-200">
                                             <img 
-                                                v-if="book.cover && !failedCovers.has(book.id)" 
+                                                v-if="book.cover &amp;&amp; !failedCovers.has(book.id)" 
                                                 :src="book.cover.startsWith('uploads/') ? `/${book.cover}?t=${book.updated_at || ''}` : `/files-media/${book.cover}?t=${book.updated_at || ''}`" 
                                                 @error="handleCoverError(book.id)" 
                                                 class="w-full h-full object-cover" 
@@ -262,15 +397,15 @@ const submitImport = () => {
                                     <span class="block text-[10px] text-slate-400">Tahun {{ book.year }}</span>
                                 </td>
                                 <td class="p-4">
-                                    <span class="block font-semibold text-slate-800">{{ book.shelf }}</span>
-                                    <span :class="[
-                                        book.stock > 0 ? 'text-emerald-600' : 'text-rose-500',
-                                        'text-[11px] font-bold'
-                                    ]">
-                                        Stok: {{ book.stock }}
-                                    </span>
+                                    <button 
+                                        @click="openReadModal(book)" 
+                                        class="px-3.5 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold transition flex items-center gap-1.5 border border-blue-200"
+                                    >
+                                        <BookOpen class="w-3.5 h-3.5 text-blue-600" />
+                                        <span>Baca Referensi</span>
+                                    </button>
                                 </td>
-                                <td class="p-4 text-right">
+                                <td v-if="isAdmin" class="p-4 text-right">
                                     <div class="flex items-center justify-end gap-2">
                                         <button @click="openEditModal(book)" class="p-2 rounded-lg text-blue-600 hover:bg-blue-50 transition-colors" title="Edit">
                                             <Edit class="w-4 h-4" />
@@ -311,7 +446,19 @@ const submitImport = () => {
                             </div>
                             <div>
                                 <label class="block font-bold text-slate-700 uppercase mb-1">ISBN</label>
-                                <input v-model="form.isbn" type="text" placeholder="Contoh: 978-602-1234-01-1" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:border-blue-500" />
+                                <div class="flex gap-2">
+                                    <input v-model="form.isbn" type="text" placeholder="Contoh: 9786020332949" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:border-blue-500" />
+                                    <button
+                                        type="button"
+                                        @click="handleIsbnEnrich"
+                                        :disabled="isEnriching || !form.isbn"
+                                        class="px-3 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold rounded-xl text-xs whitespace-nowrap border border-indigo-200 flex items-center gap-1 transition disabled:opacity-50"
+                                    >
+                                        <Sparkles class="w-3.5 h-3.5 text-indigo-600" />
+                                        <span>Auto-Isi</span>
+                                    </button>
+                                </div>
+                                <span v-if="enrichStatus" class="block text-[10px] mt-1 font-medium text-indigo-600">{{ enrichStatus }}</span>
                             </div>
                         </div>
 
@@ -391,22 +538,205 @@ const submitImport = () => {
                     </div>
 
                     <form @submit.prevent="submitImport" class="space-y-4 text-xs">
-                        <div class="p-4 bg-blue-50 border border-blue-100 rounded-2xl text-blue-950 space-y-1">
-                            <span class="font-bold">Format Excel (.xlsx / .csv):</span>
-                            <p class="text-[11px] text-slate-600">Pastikan baris pertama berisi kolom header: <code>kode_buku, judul_buku, pengarang, penerbit, tahun, kategori, rak, stok</code>.</p>
+                        <!-- Format Helper Banner -->
+                        <div class="p-4 bg-blue-50/80 border border-blue-100 rounded-2xl text-blue-950 space-y-1">
+                            <span class="font-bold">Format Excel / CSV (.xlsx, .xls, .csv):</span>
+                            <p class="text-[11px] text-slate-600">Dapat mengunggah file lokal (header Indonesia) atau file dataset Kaggle/Goodreads langsung (header Inggris: <code>title, author, publisher, isbn, year</code>).</p>
                         </div>
 
-                        <div>
-                            <input @change="e => importForm.file = e.target.files[0]" type="file" required accept=".xlsx,.xls,.csv" class="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:bg-blue-600 file:text-white font-bold" />
+                        <!-- Processing Spinning Banner -->
+                        <div v-if="importForm.processing" class="p-5 text-center text-slate-700 space-y-2 bg-blue-50/90 rounded-2xl border border-blue-200 animate-pulse">
+                            <Loader2 class="w-8 h-8 text-blue-600 animate-spin mx-auto" />
+                            <div>
+                                <p class="font-extrabold text-sm text-blue-950">Sedang Memproses &amp; Mengimpor Dataset...</p>
+                                <p class="text-[11px] text-slate-600 mt-0.5 font-medium">Mohon tunggu sebentar, sistem sedang membaca dan mengunggah seluruh data ke database.</p>
+                            </div>
+                        </div>
+
+                        <div v-else>
+                            <input @change="e => importForm.file = e.target.files[0]" type="file" required accept=".xlsx,.xls,.csv" class="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:bg-blue-600 file:text-white font-bold cursor-pointer" />
                         </div>
 
                         <div class="pt-2 flex justify-end gap-3">
-                            <button type="button" @click="isImportOpen = false" class="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 font-bold">Batal</button>
-                            <button :disabled="importForm.processing" type="submit" class="px-5 py-2 rounded-xl bg-blue-600 text-white font-bold">
-                                {{ importForm.processing ? 'Mengunggah...' : 'Import Data' }}
+                            <button type="button" :disabled="importForm.processing" @click="isImportOpen = false" class="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 font-bold disabled:opacity-50">Batal</button>
+                            <button 
+                                :disabled="importForm.processing || !importForm.file" 
+                                type="submit" 
+                                class="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-extrabold shadow-md shadow-blue-500/20 transition flex items-center justify-center gap-2 cursor-pointer"
+                            >
+                                <Loader2 v-if="importForm.processing" class="w-4 h-4 text-white animate-spin shrink-0" />
+                                <span>{{ importForm.processing ? 'Memproses Impor...' : 'Mulai Import Data' }}</span>
                             </button>
                         </div>
                     </form>
+                </div>
+            </div>
+
+            <!-- Modal 1: Live Web Search Import -->
+            <div v-if="isWebSearchOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+                <div class="bg-white rounded-3xl max-w-2xl w-full p-6 shadow-2xl border border-slate-100 space-y-4 max-h-[90vh] flex flex-col">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                        <div class="flex items-center gap-2">
+                            <Sparkles class="w-5 h-5 text-amber-500" />
+                            <h3 class="font-extrabold text-slate-900 text-base">Cari &amp; Tambah Referensi dari Web</h3>
+                        </div>
+                        <button @click="isWebSearchOpen = false" class="p-2 rounded-xl text-slate-400 hover:bg-slate-100">
+                            <X class="w-5 h-5" />
+                        </button>
+                    </div>
+
+                    <div class="space-y-3">
+                        <div class="flex gap-2">
+                            <input 
+                                v-model="webSearchQuery" 
+                                @keyup.enter="searchWebBooks" 
+                                type="text" 
+                                placeholder="Ketik judul buku, pengarang, atau topik sains..." 
+                                class="flex-grow p-3 rounded-2xl border border-slate-200 text-xs font-medium focus:ring-2 focus:ring-blue-500/20 outline-none"
+                            />
+                            <button 
+                                @click="searchWebBooks" 
+                                :disabled="isSearchingWeb"
+                                class="px-5 py-3 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs flex items-center gap-2"
+                            >
+                                <Search class="w-4 h-4" />
+                                <span>{{ isSearchingWeb ? 'Mencari...' : 'Cari' }}</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="flex-grow overflow-y-auto space-y-3 pr-1 min-h-[200px]">
+                        <div v-if="webSearchResults.length > 0" class="space-y-3">
+                            <div 
+                                v-for="(item, idx) in webSearchResults" 
+                                :key="idx" 
+                                class="p-3.5 bg-slate-50 rounded-2xl border border-slate-100 flex items-start gap-3.5 hover:border-blue-200 transition"
+                            >
+                                <img 
+                                    v-if="item.cover_url" 
+                                    :src="item.cover_url" 
+                                    :alt="item.title" 
+                                    class="w-12 h-16 object-cover rounded-lg shrink-0 shadow-xs border border-slate-200"
+                                />
+                                <div v-else class="w-12 h-16 bg-slate-200 rounded-lg shrink-0 flex items-center justify-center text-slate-400">
+                                    <BookOpen class="w-6 h-6" />
+                                </div>
+
+                                <div class="flex-grow min-w-0">
+                                    <h4 class="font-extrabold text-xs text-slate-900 line-clamp-1">{{ item.title }}</h4>
+                                    <p class="text-[11px] text-slate-500 mt-0.5">Penulis: {{ item.author }} | {{ item.publication_year || '-' }}</p>
+                                    <p v-if="item.isbn" class="text-[10px] text-blue-600 font-mono mt-0.5">ISBN: {{ item.isbn }}</p>
+                                    <p v-if="item.description" class="text-[11px] text-slate-600 line-clamp-2 mt-1 italic">{{ item.description }}</p>
+                                </div>
+
+                                <button 
+                                    @click="importWebBook(item)" 
+                                    :disabled="importingItemTitle === item.title"
+                                    class="px-3 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-[11px] shrink-0 shadow-xs transition"
+                                >
+                                    {{ importingItemTitle === item.title ? 'Impor...' : '+ Tambahkan' }}
+                                </button>
+                            </div>
+                        </div>
+                        <div v-else-if="isSearchingWeb" class="py-12 text-center text-slate-500 text-xs flex flex-col items-center justify-center gap-2">
+                            <Sparkles class="w-6 h-6 text-blue-600 animate-spin" />
+                            <span class="font-bold">Sedang mencari buku di internet...</span>
+                        </div>
+                        <div v-else-if="hasSearchedWeb &amp;&amp; webSearchResults.length === 0" class="py-12 text-center text-slate-500 text-xs">
+                            Tidak ditemukan hasil untuk kata kunci "{{ webSearchQuery }}". Silakan coba kata kunci lain.
+                        </div>
+                        <div v-else class="py-12 text-center text-slate-400 text-xs">
+                            Ketikkan kata kunci di atas dan tekan Cari untuk menemukan buku secara otomatis dari internet.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal 2: Batch ISBN Import -->
+            <div v-if="isBatchIsbnOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+                <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 space-y-4">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                        <div class="flex items-center gap-2">
+                            <BookMarked class="w-5 h-5 text-blue-600" />
+                            <h3 class="font-extrabold text-slate-900 text-base">Import Batch dari Daftar ISBN</h3>
+                        </div>
+                        <button @click="isBatchIsbnOpen = false" class="p-2 rounded-xl text-slate-400 hover:bg-slate-100">
+                            <X class="w-5 h-5" />
+                        </button>
+                    </div>
+
+                    <div class="space-y-3 text-xs">
+                        <p class="text-slate-600 font-medium">Paste daftar nomor ISBN (satu nomor per baris). Sistem akan menarik metadata lengkap (Judul, Pengarang, Sampul) secara otomatis dari internet.</p>
+                        <textarea 
+                            v-model="batchIsbnText" 
+                            rows="6" 
+                            placeholder="9780131103627&#10;9780262033848&#10;9780596007126" 
+                            class="w-full p-3 rounded-2xl border border-slate-200 font-mono text-xs focus:ring-2 focus:ring-blue-500/20 outline-none"
+                        ></textarea>
+                    </div>
+
+                    <div class="pt-2 flex justify-end gap-3">
+                        <button type="button" @click="isBatchIsbnOpen = false" class="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 font-bold text-xs">Batal</button>
+                        <button 
+                            @click="submitBatchIsbn" 
+                            :disabled="isBatchImporting"
+                            class="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs"
+                        >
+                            {{ isBatchImporting ? 'Memproses Impor...' : 'Proses Impor Massal' }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal 3: Read Reference Detail Modal -->
+            <div v-if="isReadModalOpen && selectedReadBook" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+                <div class="bg-white rounded-3xl max-w-xl w-full p-6 shadow-2xl border border-slate-100 space-y-4 max-h-[90vh] overflow-y-auto">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                        <div class="flex items-center gap-2">
+                            <BookOpen class="w-5 h-5 text-blue-600" />
+                            <h3 class="font-extrabold text-slate-900 text-base">Detail Referensi Literatur</h3>
+                        </div>
+                        <button @click="isReadModalOpen = false" class="p-2 rounded-xl text-slate-400 hover:bg-slate-100">
+                            <X class="w-5 h-5" />
+                        </button>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row gap-4 items-start">
+                        <div class="w-24 h-32 bg-slate-100 rounded-xl overflow-hidden shrink-0 border border-slate-200 shadow-xs flex items-center justify-center text-slate-400">
+                            <img 
+                                v-if="selectedReadBook.cover && !failedCovers.has(selectedReadBook.id)" 
+                                :src="selectedReadBook.cover.startsWith('uploads/') ? `/${selectedReadBook.cover}` : `/files-media/${selectedReadBook.cover}`" 
+                                class="w-full h-full object-cover" 
+                            />
+                            <BookOpen v-else class="w-8 h-8 text-slate-400" />
+                        </div>
+                        <div class="space-y-1.5 min-w-0 flex-grow text-xs">
+                            <span class="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-100">
+                                {{ selectedReadBook.category?.name || 'Katalog Referensi' }}
+                            </span>
+                            <h4 class="font-extrabold text-slate-900 text-sm leading-snug">{{ selectedReadBook.title }}</h4>
+                            <p class="text-slate-600 font-medium">Penulis: <span class="font-bold text-slate-800">{{ selectedReadBook.author }}</span></p>
+                            <p class="text-slate-500">Penerbit: {{ selectedReadBook.publisher }} ({{ selectedReadBook.year }})</p>
+                            <p v-if="selectedReadBook.isbn" class="text-blue-600 font-mono text-[11px]">ISBN: {{ selectedReadBook.isbn }}</p>
+                        </div>
+                    </div>
+
+                    <div v-if="selectedReadBook.description" class="p-4 bg-slate-50 rounded-2xl border border-slate-100 space-y-1 text-xs">
+                        <span class="font-bold text-slate-700">Sinopsis / Ringkasan Referensi:</span>
+                        <p class="text-slate-600 leading-relaxed italic">{{ selectedReadBook.description }}</p>
+                    </div>
+
+                    <div class="pt-2 flex flex-col sm:flex-row items-center justify-end gap-3 border-t border-slate-100">
+                        <button type="button" @click="isReadModalOpen = false" class="w-full sm:w-auto px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-bold text-xs">Tutup</button>
+                        <a 
+                            :href="`https://www.google.com/search?q=${encodeURIComponent(selectedReadBook.title + ' ' + selectedReadBook.author)}`" 
+                            target="_blank" 
+                            class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs shadow-md shadow-blue-500/20 flex items-center justify-center gap-2"
+                        >
+                            <BookOpen class="w-4 h-4" />
+                            <span>Buka / Baca Sumber Digital</span>
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>

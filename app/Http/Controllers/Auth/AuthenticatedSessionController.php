@@ -33,7 +33,12 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        $user = $request->user();
+        if ($user && in_array($user->role, ['admin', 'pustakawan', 'kepala_sekolah'])) {
+            return redirect()->intended(route('dashboard', absolute: false));
+        }
+
+        return redirect()->intended(route('litera.workspace', absolute: false));
     }
 
     /**

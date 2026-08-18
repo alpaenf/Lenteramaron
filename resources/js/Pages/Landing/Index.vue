@@ -1,12 +1,12 @@
 <script setup>
 import { ref, onMounted } from 'vue';
-import { useForm, router } from '@inertiajs/vue3';
+import { useForm, router, Link } from '@inertiajs/vue3';
 import GuestLayout from '@/Layouts/GuestLayout.vue';
 import { 
     Search, BookOpen, PenTool, BookMarked, Users, ArrowRightLeft, 
     RotateCcw, ClipboardList, BarChart3, ArrowRight, Sun, Sparkles, 
     MessageSquare, School, Landmark, Star, Lightbulb, Flag, MapPin, 
-    Phone, Mail, FileText, Send, CheckCircle, ChevronDown, Filter, ExternalLink
+    Phone, Mail, FileText, Send, CheckCircle, ChevronDown, Filter, ExternalLink, Compass
 } from 'lucide-vue-next';
 
 const props = defineProps({
@@ -85,6 +85,12 @@ onMounted(() => {
 
 const search = ref(props.filters.search || '');
 const categoryId = ref(props.filters.category_id || '');
+const heroQuery = ref('');
+
+const submitHeroSearch = () => {
+    if (!heroQuery.value || heroQuery.value.trim().length < 2) return;
+    router.get('/litera/search', { q: heroQuery.value.trim() });
+};
 
 const filterBooks = () => {
     const query = {};
@@ -169,34 +175,25 @@ const getFallbackUrl = (category) => {
 <template>
     <GuestLayout>
         <!-- Hero Section -->
-        <section class="relative min-h-[82vh] flex items-center overflow-hidden px-4 sm:px-6 lg:px-8 bg-[#f4f8fc] pt-12 pb-16 lg:pt-14 lg:pb-20">
-            <!-- Background Decorative Ornaments -->
-            <div class="absolute top-10 left-10 text-amber-400 animate-float-wobble pointer-events-none">
-                <svg class="w-16 h-16" viewBox="0 0 100 100" fill="none">
-                    <circle cx="50" cy="50" r="24" fill="#FACC15"/>
-                    <path d="M50 10 V 2, M50 90 V 98, M10 50 H 2, M90 50 H 98, M22 22 L 16 16, M78 78 L 84 84, M22 78 L 16 84, M78 22 L 84 16" stroke="#FACC15" stroke-width="6" stroke-linecap="round"/>
-                </svg>
-            </div>
-            <div class="absolute top-14 left-1/3 text-blue-300 pointer-events-none opacity-80 animate-float-wobble" style="animation-delay: 1.5s;">
-                <svg class="w-10 h-10 -rotate-12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
-                </svg>
-            </div>
+        <section class="relative min-h-[85vh] flex items-center overflow-hidden px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-blue-50/60 via-slate-50 to-white pt-12 pb-16 lg:pt-14 lg:pb-20">
+            <!-- Background Decorative Soft Glowing Orbs -->
+            <div class="absolute -top-24 -left-24 w-96 h-96 bg-blue-400/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute top-1/2 right-10 w-80 h-80 bg-emerald-400/10 rounded-full blur-3xl pointer-events-none"></div>
 
             <div class="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-10 items-center relative z-10">
                 <!-- Hero Left Content -->
-                <div class="lg:col-span-6 space-y-6 text-center lg:text-left relative reveal-on-scroll">
+                <div class="lg:col-span-7 space-y-6 text-center lg:text-left relative reveal-on-scroll">
                     <div>
-                        <span class="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-[#8df3a4] text-[#0d5926] text-xs font-bold uppercase tracking-wider shadow-xs">
-                            SELAMAT DATANG DI SD NEGERI 02 MARON
+                        <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-100/80 text-blue-800 text-xs font-extrabold uppercase tracking-wider shadow-xs border border-blue-200/80">
+                            LITERA — AI RESEARCH &amp; KNOWLEDGE NAVIGATOR
                             <Sparkles class="w-3.5 h-3.5 text-amber-500 shrink-0" />
                         </span>
                     </div>
 
                     <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-900 leading-[1.15] tracking-tight">
-                        Membaca Adalah <br/>
-                        <span class="text-[#0054a6] relative inline-block">
-                            Jendela Dunia
+                        From Library Knowledge <br/>
+                        <span class="text-blue-600 relative inline-block">
+                            to Research Discovery
                             <svg class="absolute -bottom-3 left-0 w-full" viewBox="0 0 240 12" fill="none">
                                 <path d="M3 9 C 70 2, 170 2, 237 9" stroke="#facc15" stroke-width="4" stroke-linecap="round"/>
                             </svg>
@@ -205,44 +202,73 @@ const getFallbackUrl = (category) => {
                     </h1>
 
                     <p class="text-base sm:text-lg text-slate-600 max-w-xl mx-auto lg:mx-0 leading-relaxed font-medium">
-                        Nyalakan cahaya ilmu melalui koleksi buku yang inspiratif dan ruang baca yang ceria. Perpustakaan ramah anak untuk generasi masa depan yang gemilang.
+                        Platform navigasi cerdas yang menghubungkan koleksi referensi perpustakaan lokal dengan sumber jurnal ilmiah internasional. Dipandu AI untuk menemukan, memahami, dan menavigasi alur membaca secara terstruktur.
                     </p>
 
-                    <div class="flex flex-wrap gap-4 justify-center lg:justify-start pt-2">
-                        <a href="#katalog" class="bg-[#0066cc] hover:bg-[#0052a3] text-white px-8 py-3.5 rounded-2xl font-bold text-sm shadow-xl shadow-blue-500/25 hover:scale-105 transition-all duration-200 flex items-center gap-2.5">
-                            <BookOpen class="w-4 h-4" />
-                            <span>Jelajahi Buku</span>
-                        </a>
-                        <a href="#profil" class="border-2 border-[#0066cc] text-[#0066cc] bg-white/80 hover:bg-blue-50/50 px-8 py-3.5 rounded-2xl font-bold text-sm flex items-center gap-2.5 transition-all duration-200 shadow-sm">
-                            <Users class="w-4 h-4" />
-                            <span>Tentang Kami</span>
-                        </a>
+                    <!-- Hero AI Search Input Box -->
+                    <form @submit.prevent="submitHeroSearch" class="mt-4 flex flex-col sm:flex-row items-center gap-2 bg-white p-2 rounded-2xl shadow-xl border border-slate-200/80">
+                        <div class="relative w-full">
+                            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                                <Search class="w-5 h-5" />
+                            </span>
+                            <input
+                                v-model="heroQuery"
+                                type="text"
+                                placeholder="Ketik topik penelitian (misal: Generative AI, Literasi Digital)..."
+                                class="w-full pl-11 pr-4 py-3 bg-transparent text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:ring-0 border-0 font-medium"
+                            />
+                        </div>
+                        <button
+                            type="submit"
+                            :disabled="!heroQuery.trim()"
+                            class="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 text-white font-bold rounded-xl text-sm transition shadow-lg flex items-center justify-center gap-2 whitespace-nowrap cursor-pointer"
+                        >
+                            <Sparkles class="w-4 h-4 text-amber-300" />
+                            <span>Cari &amp; Navigasi Riset</span>
+                        </button>
+                    </form>
+
+                    <!-- Quick Sample Tags -->
+                    <div class="flex flex-wrap items-center justify-center lg:justify-start gap-2 pt-1 text-xs text-slate-500 font-medium">
+                        <span class="text-slate-400 font-semibold">Contoh Topik:</span>
+                        <button @click="heroQuery = 'Kecerdasan Buatan dalam Pendidikan'; submitHeroSearch()" class="hover:text-blue-600 underline hover:no-underline">AI Pendidikan</button>
+                        <span>•</span>
+                        <button @click="heroQuery = 'Metodologi Penelitian'; submitHeroSearch()" class="hover:text-blue-600 underline hover:no-underline">Metodologi Penelitian</button>
+                        <span>•</span>
+                        <button @click="heroQuery = 'Data Science & Machine Learning'; submitHeroSearch()" class="hover:text-blue-600 underline hover:no-underline">Data Science</button>
+                    </div>
+
+                    <div class="flex flex-wrap gap-4 justify-center lg:justify-start pt-3">
+                        <Link href="/litera/workspace" class="border border-slate-200 text-slate-700 bg-white hover:bg-slate-50 px-6 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 transition-all shadow-xs">
+                            <BookOpen class="w-4 h-4 text-blue-600" />
+                            <span>Buka Research Workspace</span>
+                        </Link>
                     </div>
                 </div>
 
-                <!-- Hero Right Illustration with Organic Blob Curve -->
-                <div class="lg:col-span-6 relative reveal-on-scroll reveal-delay-2">
-                    <div class="relative w-full max-w-xl mx-auto">
+                <!-- Hero Right Illustration -->
+                <div class="lg:col-span-5 relative reveal-on-scroll reveal-delay-2">
+                    <div class="relative w-full max-w-md mx-auto">
                         <!-- Curved Image Container -->
-                        <div class="rounded-[40px] lg:rounded-[55px] overflow-hidden border-4 border-white shadow-2xl shadow-blue-900/10 bg-white aspect-[4/3]">
+                        <div class="rounded-[40px] overflow-hidden border-4 border-white shadow-2xl shadow-blue-900/10 bg-white aspect-[4/3]">
                             <img class="w-full h-full object-cover transform hover:scale-105 transition-transform duration-700" 
-                                 alt="Perpustakaan Lentera Maron SD Negeri 02 Maron" 
+                                 alt="LITERA AI Research Navigator Platform" 
                                  :src="settings.hero_banner_path ? '/files-media/' + settings.hero_banner_path : '/images/hero.png'"/>
                         </div>
 
-                        <!-- Floating Chat Widget (Bottom Right) -->
-                        <div class="absolute -bottom-6 -right-2 sm:right-4 bg-white/95 backdrop-blur-md p-4 rounded-3xl shadow-2xl border border-slate-100 flex items-center gap-3 z-20 max-w-xs animate-float-wobble">
-                            <div class="w-11 h-11 rounded-2xl bg-emerald-100 flex items-center justify-center text-emerald-600 shrink-0 font-bold">
-                                <BookOpen class="w-5 h-5 text-emerald-600" />
+                        <!-- Floating Badge Widget (Bottom Right) -->
+                        <div class="absolute -bottom-6 -right-2 sm:right-2 bg-white/95 backdrop-blur-md p-4 rounded-3xl shadow-2xl border border-slate-100 flex items-center gap-3 z-20 max-w-xs animate-float-wobble">
+                            <div class="w-11 h-11 rounded-2xl bg-blue-100 flex items-center justify-center text-blue-600 shrink-0 font-bold">
+                                <Sparkles class="w-5 h-5 text-blue-600" />
                             </div>
                             <div>
                                 <p class="text-xs font-extrabold text-slate-900 flex items-center gap-1">
-                                    <span>Halo Sahabat Literasi!</span>
+                                    <span>AI Discovery Engine</span>
                                 </p>
-                                <p class="text-[10px] text-slate-500 font-medium">Butuh bantuan? Yuk, tanya pustakawan!</p>
-                                <a href="#buku-tamu" class="mt-1.5 inline-block bg-[#0066cc] hover:bg-[#0052a3] text-white text-[10px] font-bold px-3.5 py-1.5 rounded-full shadow-md shadow-blue-500/20 transition-all">
-                                    Chat Sekarang
-                                </a>
+                                <p class="text-[10px] text-slate-500 font-medium">Temukan &amp; pahami jurnal ilmiah secara presisi</p>
+                                <Link href="/litera/search" class="mt-1.5 inline-block bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-bold px-3.5 py-1.5 rounded-full shadow-md shadow-blue-500/20 transition-all">
+                                    Mulai Pencarian
+                                </Link>
                             </div>
                         </div>
                     </div>
@@ -268,40 +294,40 @@ const getFallbackUrl = (category) => {
                     </div>
                     <div class="w-full lg:w-1/2 space-y-6 reveal-on-scroll reveal-delay-2">
                         <div>
-                            <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 text-[#0066cc] text-xs font-extrabold uppercase tracking-wider mb-2">
-                                <School class="w-4 h-4 text-[#0066cc]" />
-                                <span>PROFIL PERPUSTAKAAN</span>
+                            <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 text-blue-600 text-xs font-extrabold uppercase tracking-wider mb-2">
+                                <School class="w-4 h-4 text-blue-600" />
+                                <span>PROFIL PLATFORM</span>
                             </span>
                         </div>
                         <h2 class="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight leading-tight inline-block relative">
-                            Pusat Literasi <br/>
-                            <span class="text-[#0054a6] relative inline-block">
-                                SD Negeri 02 Maron
+                            Platform Navigator <br/>
+                            <span class="text-blue-600 relative inline-block">
+                                Pengetahuan &amp; Riset
                                 <svg class="absolute -bottom-2 left-0 w-full" viewBox="0 0 240 10" fill="none">
                                     <path d="M2 7 C 70 2, 170 2, 238 7" stroke="#facc15" stroke-width="4" stroke-linecap="round"/>
                                 </svg>
                             </span>
                         </h2>
                         <p class="text-slate-600 leading-relaxed text-base font-medium">
-                            Lentera Maron didirikan sebagai jantung dari proses pembelajaran di SD Negeri 02 Maron. Sejak awal, visi kami adalah menciptakan ruang di mana setiap anak merasa bersemangat untuk menggali pengetahuan melalui literasi.
+                            LITERA dikembangkan untuk menjembatani jurang antara pengetahuan dasar yang ada pada koleksi lokal dengan perkembangan riset &amp; sains terbaru di seluruh dunia.
                         </p>
                         <p class="text-slate-600 leading-relaxed text-base font-medium">
-                            Dengan ribuan koleksi buku pilihan, dari fiksi hingga referensi sains, kami berkomitmen untuk mendampingi siswa-siswi dalam perjalanan intelektual mereka. Perpustakaan kami bukan sekadar tempat menyimpan buku, melainkan ruang kreasi dan eksplorasi.
+                            Dengan mengintegrasikan kecerdasan AI berstandar ilmiah dan indeks literatur global, LITERA membantu pengguna berpindah dari pemahaman konsep awal menuju eksplorasi *research gap* terkini.
                         </p>
                         <div class="grid grid-cols-2 gap-5 pt-2">
                             <div class="p-6 bg-[#f4f8fc] rounded-3xl border border-slate-100 shadow-xs hover:shadow-md hover:-translate-y-1 transition-all duration-300">
-                                <div class="w-12 h-12 rounded-2xl bg-blue-100 text-[#0066cc] flex items-center justify-center font-bold text-2xl mb-3">
-                                    <Landmark class="w-6 h-6 text-[#0066cc]" />
+                                <div class="w-12 h-12 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-2xl mb-3">
+                                    <Landmark class="w-6 h-6 text-blue-600" />
                                 </div>
-                                <div class="font-extrabold text-base text-slate-900">Didirikan 2010</div>
-                                <div class="text-xs text-slate-500 font-medium mt-1">Dedikasi satu dekade lebih untuk literasi.</div>
+                                <div class="font-extrabold text-base text-slate-900">100% Grounded AI</div>
+                                <div class="text-xs text-slate-500 font-medium mt-1">Penjelasan berbasis data empiris tanpa manipulasi LLM.</div>
                             </div>
                             <div class="p-6 bg-[#f4f8fc] rounded-3xl border border-slate-100 shadow-xs hover:shadow-md hover:-translate-y-1 transition-all duration-300">
                                 <div class="w-12 h-12 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center font-bold text-2xl mb-3">
                                     <Star class="w-6 h-6 text-amber-500 fill-amber-500" />
                                 </div>
-                                <div class="font-extrabold text-base text-slate-900">Akreditasi A</div>
-                                <div class="text-xs text-slate-500 font-medium mt-1">Standar pelayanan perpustakaan nasional.</div>
+                                <div class="font-extrabold text-base text-slate-900">Open Access</div>
+                                <div class="text-xs text-slate-500 font-medium mt-1">Akses mudah ke jutaan paper jurnal internasional.</div>
                             </div>
                         </div>
                     </div>
@@ -314,53 +340,46 @@ const getFallbackUrl = (category) => {
             <div class="max-w-7xl mx-auto">
                 <div class="text-center max-w-2xl mx-auto mb-14 space-y-2 reveal-on-scroll">
                     <h2 class="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight inline-block relative">
-                        Visi &amp; Misi Kami
+                        Visi &amp; Misi LITERA
                         <svg class="absolute -bottom-2 left-0 w-full" viewBox="0 0 200 10" fill="none">
                             <path d="M2 7 C 60 2, 140 2, 198 7" stroke="#facc15" stroke-width="4" stroke-linecap="round"/>
                         </svg>
                     </h2>
-                    <p class="text-slate-600 text-base font-medium">Membangun fondasi masa depan melalui budaya baca yang ceria.</p>
+                    <p class="text-slate-600 text-base font-medium">Mendorong keberlanjutan eksplorasi sains dan literasi ilmiah.</p>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div class="p-8 lg:p-10 bg-gradient-to-br from-[#0066cc] to-[#004080] rounded-3xl text-white shadow-xl relative overflow-hidden group reveal-on-scroll hover:-translate-y-1 transition-transform duration-300">
+                    <div class="p-8 lg:p-10 bg-gradient-to-br from-blue-700 to-slate-900 rounded-3xl text-white shadow-xl relative overflow-hidden group reveal-on-scroll hover:-translate-y-1 transition-transform duration-300">
                         <div class="w-14 h-14 rounded-2xl bg-white/10 flex items-center justify-center mb-4 backdrop-blur-md">
                             <Lightbulb class="w-7 h-7 text-amber-300" />
                         </div>
                         <h3 class="text-2xl font-black mb-4 flex items-center gap-3">
-                            <span>Visi Perpustakaan</span>
+                            <span>Visi LITERA</span>
                         </h3>
                         <p class="text-lg leading-relaxed font-medium text-blue-50">
-                            {{ settings.vision || 'Menjadi pusat sumber belajar yang unggul dalam membentuk generasi pembelajar sepanjang hayat, cerdas, berkarakter, dan berwawasan luas melalui penguatan budaya literasi.' }}
+                            Menjadi navigator pengetahuan cerdas berstandar ilmiah yang membantu setiap peneliti, guru, dan pelajar berpindah dari fondasi teori awal menuju inovasi sains mutakhir.
                         </p>
                     </div>
                     <div class="p-8 lg:p-10 bg-white rounded-3xl border-2 border-blue-100 shadow-xl relative overflow-hidden group reveal-on-scroll reveal-delay-2 hover:-translate-y-1 transition-transform duration-300">
                         <div class="w-14 h-14 rounded-2xl bg-blue-50 flex items-center justify-center mb-4">
-                            <Flag class="w-7 h-7 text-[#0066cc]" />
+                            <Flag class="w-7 h-7 text-blue-600" />
                         </div>
-                        <h3 class="text-2xl font-black text-[#0066cc] mb-4 flex items-center gap-3">
+                        <h3 class="text-2xl font-black text-blue-600 mb-4 flex items-center gap-3">
                             <span>Misi Utama</span>
                         </h3>
-                        <ul v-if="!settings.mission" class="space-y-3 text-slate-600 text-base font-medium relative z-10">
+                        <ul class="space-y-3 text-slate-600 text-base font-medium relative z-10">
                             <li class="flex gap-3 items-start">
                                 <CheckCircle class="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
-                                <span>Menyediakan koleksi pustaka yang relevan, inspiratif, dan mutakhir.</span>
+                                <span>Menyediakan pencarian literatur semantik tanpa ketergantungan pada exact keyword.</span>
                             </li>
                             <li class="flex gap-3 items-start">
                                 <CheckCircle class="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
-                                <span>Memberikan pelayanan prima yang ramah anak dan edukatif.</span>
+                                <span>Memberikan sintesis penjelasan relevansi AI yang jujur tanpa manipulasi data.</span>
                             </li>
                             <li class="flex gap-3 items-start">
                                 <CheckCircle class="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
-                                <span>Mengembangkan inovasi program literasi berbasis digital.</span>
-                            </li>
-                            <li class="flex gap-3 items-start">
-                                <CheckCircle class="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
-                                <span>Menyelenggarakan kegiatan kreatif yang menumbuhkan minat baca.</span>
+                                <span>Menyusun 5 tahap alur eksplorasi membaca (Research Path) secara otomatis.</span>
                             </li>
                         </ul>
-                        <div v-else class="text-slate-600 text-base relative z-10 whitespace-pre-line leading-relaxed font-medium">
-                            {{ settings.mission }}
-                        </div>
                     </div>
                 </div>
             </div>
@@ -396,62 +415,62 @@ const getFallbackUrl = (category) => {
                         </div>
                     </a>
 
-                    <!-- Card 2: Peminjaman -->
-                    <a href="#katalog" class="bg-white p-6 rounded-3xl border border-slate-100 shadow-[0_4px_25px_rgba(0,0,0,0.04)] hover:shadow-xl hover:-translate-y-2 transition-all duration-300 flex flex-col justify-between group reveal-on-scroll reveal-delay-2">
+                    <!-- Card 2: AI Research Search -->
+                    <Link :href="route('litera.search')" class="bg-white p-6 rounded-3xl border border-slate-100 shadow-[0_4px_25px_rgba(0,0,0,0.04)] hover:shadow-xl hover:-translate-y-2 transition-all duration-300 flex flex-col justify-between group reveal-on-scroll reveal-delay-2">
+                        <div>
+                            <div class="w-14 h-14 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+                                <Sparkles class="w-7 h-7 text-blue-600" />
+                            </div>
+                            <h3 class="font-extrabold text-base text-slate-900 mb-1.5">AI Research Search</h3>
+                            <p class="text-xs text-slate-500 leading-relaxed font-medium">Cari literatur ilmiah &amp; koleksi referensi berbasis bahasa alami.</p>
+                        </div>
+                        <div class="mt-6 flex justify-end">
+                            <div class="w-8 h-8 rounded-full bg-blue-50 group-hover:bg-blue-600 text-blue-600 group-hover:text-white flex items-center justify-center transition-colors shadow-xs">
+                                <ArrowRight class="w-4 h-4" />
+                            </div>
+                        </div>
+                    </Link>
+
+                    <!-- Card 3: Research Path Navigation -->
+                    <Link :href="route('litera.search')" class="bg-white p-6 rounded-3xl border border-slate-100 shadow-[0_4px_25px_rgba(0,0,0,0.04)] hover:shadow-xl hover:-translate-y-2 transition-all duration-300 flex flex-col justify-between group reveal-on-scroll reveal-delay-3">
                         <div>
                             <div class="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
-                                <ArrowRightLeft class="w-7 h-7" />
+                                <Compass class="w-7 h-7 text-emerald-600" />
                             </div>
-                            <h3 class="font-extrabold text-base text-slate-900 mb-1.5">Peminjaman</h3>
-                            <p class="text-xs text-slate-500 leading-relaxed font-medium">Pinjam buku untuk menambah pengetahuanmu.</p>
+                            <h3 class="font-extrabold text-base text-slate-900 mb-1.5">Research Path</h3>
+                            <p class="text-xs text-slate-500 leading-relaxed font-medium">Alur eksplorasi urutan membaca dari dasar hingga studi terbaru.</p>
                         </div>
                         <div class="mt-6 flex justify-end">
                             <div class="w-8 h-8 rounded-full bg-emerald-50 group-hover:bg-emerald-600 text-emerald-600 group-hover:text-white flex items-center justify-center transition-colors shadow-xs">
                                 <ArrowRight class="w-4 h-4" />
                             </div>
                         </div>
-                    </a>
+                    </Link>
 
-                    <!-- Card 3: Pengembalian -->
-                    <a href="#profil" class="bg-white p-6 rounded-3xl border border-slate-100 shadow-[0_4px_25px_rgba(0,0,0,0.04)] hover:shadow-xl hover:-translate-y-2 transition-all duration-300 flex flex-col justify-between group reveal-on-scroll reveal-delay-3">
+                    <!-- Card 4: Research Workspace -->
+                    <Link :href="route('litera.workspace')" class="bg-white p-6 rounded-3xl border border-slate-100 shadow-[0_4px_25px_rgba(0,0,0,0.04)] hover:shadow-xl hover:-translate-y-2 transition-all duration-300 flex flex-col justify-between group reveal-on-scroll reveal-delay-4">
                         <div>
                             <div class="w-14 h-14 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
-                                <RotateCcw class="w-7 h-7" />
+                                <BookOpen class="w-7 h-7 text-purple-600" />
                             </div>
-                            <h3 class="font-extrabold text-base text-slate-900 mb-1.5">Pengembalian</h3>
-                            <p class="text-xs text-slate-500 leading-relaxed font-medium">Kembalikan buku tepat waktu agar tidak denda.</p>
+                            <h3 class="font-extrabold text-base text-slate-900 mb-1.5">Research Workspace</h3>
+                            <p class="text-xs text-slate-500 leading-relaxed font-medium">Simpan sumber riset, kelola topik, dan buat catatan pribadi.</p>
                         </div>
                         <div class="mt-6 flex justify-end">
                             <div class="w-8 h-8 rounded-full bg-purple-50 group-hover:bg-purple-600 text-purple-600 group-hover:text-white flex items-center justify-center transition-colors shadow-xs">
                                 <ArrowRight class="w-4 h-4" />
                             </div>
                         </div>
-                    </a>
+                    </Link>
 
-                    <!-- Card 4: Buku Tamu -->
-                    <a href="#buku-tamu" class="bg-white p-6 rounded-3xl border border-slate-100 shadow-[0_4px_25px_rgba(0,0,0,0.04)] hover:shadow-xl hover:-translate-y-2 transition-all duration-300 flex flex-col justify-between group reveal-on-scroll reveal-delay-4">
-                        <div>
-                            <div class="w-14 h-14 rounded-2xl bg-rose-50 text-rose-500 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
-                                <ClipboardList class="w-7 h-7" />
-                            </div>
-                            <h3 class="font-extrabold text-base text-slate-900 mb-1.5">Buku Tamu</h3>
-                            <p class="text-xs text-slate-500 leading-relaxed font-medium">Tinggalkan pesan dan kesan untuk perpustakaan.</p>
-                        </div>
-                        <div class="mt-6 flex justify-end">
-                            <div class="w-8 h-8 rounded-full bg-rose-50 group-hover:bg-rose-500 text-rose-500 group-hover:text-white flex items-center justify-center transition-colors shadow-xs">
-                                <ArrowRight class="w-4 h-4" />
-                            </div>
-                        </div>
-                    </a>
-
-                    <!-- Card 5: Laporan & Statistik -->
-                    <a href="#profil" class="bg-white p-6 rounded-3xl border border-slate-100 shadow-[0_4px_25px_rgba(0,0,0,0.04)] hover:shadow-xl hover:-translate-y-2 transition-all duration-300 flex flex-col justify-between group reveal-on-scroll reveal-delay-5">
+                    <!-- Card 5: Laporan & Analytics -->
+                    <a href="#katalog" class="bg-white p-6 rounded-3xl border border-slate-100 shadow-[0_4px_25px_rgba(0,0,0,0.04)] hover:shadow-xl hover:-translate-y-2 transition-all duration-300 flex flex-col justify-between group reveal-on-scroll reveal-delay-5">
                         <div>
                             <div class="w-14 h-14 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
-                                <BarChart3 class="w-7 h-7" />
+                                <BarChart3 class="w-7 h-7 text-amber-600" />
                             </div>
-                            <h3 class="font-extrabold text-base text-slate-900 mb-1.5">Laporan &amp; Statistik</h3>
-                            <p class="text-xs text-slate-500 leading-relaxed font-medium">Lihat laporan dan statistik perpustakaan.</p>
+                            <h3 class="font-extrabold text-base text-slate-900 mb-1.5">Katalog Referensi</h3>
+                            <p class="text-xs text-slate-500 leading-relaxed font-medium">Koleksi referensi buku acuan berlisensi.</p>
                         </div>
                         <div class="mt-6 flex justify-end">
                             <div class="w-8 h-8 rounded-full bg-amber-50 group-hover:bg-amber-600 text-amber-600 group-hover:text-white flex items-center justify-center transition-colors shadow-xs">
@@ -539,10 +558,10 @@ const getFallbackUrl = (category) => {
                             <img v-if="book.cover" :src="getAssetUrl(book.cover)" :alt="book.title" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                             <BookOpen v-else class="w-12 h-12 text-slate-300" />
                             <span :class="[
-                                book.stock > 0 ? 'bg-emerald-500' : 'bg-rose-500',
+                                book.stock > 0 ? 'bg-emerald-600' : 'bg-amber-600',
                                 'absolute top-3 right-3 text-[10px] font-extrabold text-white px-2.5 py-1 rounded-full shadow-md'
                             ]">
-                                {{ book.stock > 0 ? `Stok: ${book.stock}` : 'Stok Habis' }}
+                                {{ book.stock > 0 ? 'Tersedia' : 'Sedang Dipinjam' }}
                             </span>
                         </div>
                         <div class="p-4 flex-1 flex flex-col justify-between space-y-2">
@@ -556,7 +575,7 @@ const getFallbackUrl = (category) => {
                             </div>
                             <div class="pt-2 border-t border-slate-100 text-[11px] text-slate-500">
                                 <p class="truncate flex items-center gap-1 font-medium"><PenTool class="w-3 h-3 text-slate-400 shrink-0" /> {{ book.author }}</p>
-                                <p class="text-[10px] text-slate-400 mt-0.5 font-mono">Rak: {{ book.shelf }}</p>
+                                <p class="text-[10px] text-slate-400 mt-0.5 font-medium">Koleksi Terverifikasi</p>
                             </div>
                         </div>
                     </div>
@@ -743,47 +762,55 @@ const getFallbackUrl = (category) => {
                     </div>
 
                     <!-- Digital Guest Form -->
-                    <div id="buku-tamu" class="bg-[#f4f8fc] p-8 lg:p-10 rounded-3xl shadow-xl border border-slate-100 reveal-on-scroll reveal-delay-2">
-                        <div class="mb-6">
-                            <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-100 text-[#0066cc] text-xs font-extrabold uppercase tracking-wider mb-2">
-                                <FileText class="w-3.5 h-3.5 text-[#0066cc]" />
-                                <span>KUNJUNGAN PERPUSTAKAAN</span>
+                    <!-- LITERA Research Discovery Feature Card -->
+                    <div class="bg-gradient-to-br from-blue-900 via-slate-900 to-blue-950 p-8 lg:p-10 rounded-3xl shadow-xl text-white space-y-6 reveal-on-scroll reveal-delay-2 relative overflow-hidden">
+                        <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-blue-500/10 rounded-full blur-2xl pointer-events-none"></div>
+
+                        <div class="space-y-2 relative z-10">
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-white/10 text-blue-200 border border-white/10">
+                                <Sparkles class="w-3.5 h-3.5 text-amber-400" />
+                                <span>AI RESEARCH NAVIGATOR</span>
                             </span>
-                            <h3 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-                                Buku Tamu Digital
+                            <h3 class="text-2xl sm:text-3xl font-black text-white tracking-tight">
+                                From Library Knowledge to Research Discovery
                             </h3>
-                            <p class="text-xs text-slate-500 font-medium mt-1">Isi formulir ini saat Anda berkunjung ke perpustakaan.</p>
+                            <p class="text-xs text-slate-300 font-medium leading-relaxed">
+                                LITERA menghubungkan referensi perpustakaan lokal dengan sumber jurnal ilmiah internasional untuk membantu Anda menavigasi pengetahuan secara terstruktur.
+                            </p>
                         </div>
 
-                        <form @submit.prevent="submitGuestForm" class="space-y-4">
-                            <div class="space-y-1">
-                                <label class="font-extrabold text-xs text-slate-700 uppercase">Nama Lengkap <span class="text-rose-500">*</span></label>
-                                <input v-model="guestForm.name" required class="w-full p-3.5 rounded-2xl bg-white border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none text-xs font-medium" placeholder="Masukkan nama lengkap Anda" type="text"/>
+                        <div class="space-y-3 relative z-10 text-xs">
+                            <div class="flex items-start gap-3 bg-white/5 p-3 rounded-2xl border border-white/10">
+                                <div class="w-7 h-7 rounded-lg bg-blue-600/30 text-blue-300 flex items-center justify-center shrink-0 font-bold">1</div>
+                                <div>
+                                    <h4 class="font-bold text-white">Find (Temukan)</h4>
+                                    <p class="text-slate-300 text-[11px]">Cari literatur berbasis makna dan sinonim akademik tanpa tergantung exact keyword.</p>
+                                </div>
                             </div>
-                            <div class="space-y-1">
-                                <label class="font-extrabold text-xs text-slate-700 uppercase">Email / No. WA / Instansi / Kelas <span class="text-rose-500">*</span></label>
-                                <input v-model="guestForm.institution" required class="w-full p-3.5 rounded-2xl bg-white border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none text-xs font-medium" placeholder="SDN 02 Maron / Kelas 5B / Umum" type="text"/>
+
+                            <div class="flex items-start gap-3 bg-white/5 p-3 rounded-2xl border border-white/10">
+                                <div class="w-7 h-7 rounded-lg bg-blue-600/30 text-blue-300 flex items-center justify-center shrink-0 font-bold">2</div>
+                                <div>
+                                    <h4 class="font-bold text-white">Understand (Pahami)</h4>
+                                    <p class="text-slate-300 text-[11px]">Penjelasan relevansi AI ("Mengapa Relevan?") secara instan dan jujur tanpa fakta buatan.</p>
+                                </div>
                             </div>
-                            <div class="space-y-1">
-                                <label class="font-extrabold text-xs text-slate-700 uppercase">Subjek / Keperluan <span class="text-rose-500">*</span></label>
-                                <select v-model="guestForm.purpose" required class="w-full p-3.5 rounded-2xl bg-white border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none text-xs font-bold text-slate-700">
-                                    <option value="Pertanyaan Umum">Pertanyaan Umum</option>
-                                    <option value="Membaca Buku">Membaca Buku</option>
-                                    <option value="Meminjam Buku">Meminjam Buku</option>
-                                    <option value="Donasi Buku">Donasi Buku</option>
-                                    <option value="Kerjasama Literasi">Kerjasama Literasi</option>
-                                    <option value="Keluhan Pelayanan">Keluhan Pelayanan</option>
-                                </select>
+
+                            <div class="flex items-start gap-3 bg-white/5 p-3 rounded-2xl border border-white/10">
+                                <div class="w-7 h-7 rounded-lg bg-blue-600/30 text-blue-300 flex items-center justify-center shrink-0 font-bold">3</div>
+                                <div>
+                                    <h4 class="font-bold text-white">Navigate (Navigasi)</h4>
+                                    <p class="text-slate-300 text-[11px]">Rekomendasi 5 tahap alur eksplorasi urutan membaca dari dasar hingga riset terbaru.</p>
+                                </div>
                             </div>
-                            <div class="space-y-1">
-                                <label class="font-extrabold text-xs text-slate-700 uppercase">Pesan &amp; Kesan</label>
-                                <textarea v-model="guestForm.feedback" class="w-full p-3.5 rounded-2xl bg-white border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none text-xs font-medium" placeholder="Tuliskan kesan atau saran Anda..." rows="3"></textarea>
-                            </div>
-                            <button :disabled="guestForm.processing" class="w-full bg-[#0066cc] hover:bg-[#0052a3] text-white py-3.5 rounded-2xl font-bold text-sm transition-all shadow-lg shadow-blue-500/20 hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2 mt-2" type="submit">
-                                <Send class="w-4 h-4" />
-                                <span>{{ guestForm.processing ? 'Mengirim...' : 'Kirim Pesan Sekarang' }}</span>
-                            </button>
-                        </form>
+                        </div>
+
+                        <div class="pt-2 relative z-10">
+                            <Link :href="route('litera.search')" class="w-full bg-blue-600 hover:bg-blue-500 text-white py-3.5 rounded-2xl font-extrabold text-xs transition-all shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2">
+                                <Compass class="w-4 h-4 text-blue-200" />
+                                <span>Mulai Cari &amp; Navigasi Riset</span>
+                            </Link>
+                        </div>
                     </div>
                 </div>
             </div>

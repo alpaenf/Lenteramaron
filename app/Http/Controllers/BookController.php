@@ -53,22 +53,38 @@ class BookController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'book_code' => 'required|string|max:50|unique:books,book_code',
-            'isbn' => 'nullable|string|max:30',
-            'title' => 'required|string|max:255',
-            'author' => 'required|string|max:255',
-            'publisher' => 'required|string|max:255',
-            'year' => 'required|integer|min:1900|max:' . (date('Y') + 1),
-            'category_id' => 'required|exists:book_categories,id',
-            'shelf' => 'required|string|max:50',
-            'stock' => 'required|integer|min:0',
+            'book_code'   => 'required|string|max:50|unique:books,book_code',
+            'isbn'        => 'nullable|string|max:30',
+            'title'       => 'required|string|max:255',
+            'author'      => 'required|string|max:255',
+            'publisher'   => 'required|string|max:255',
+            'year'        => 'required|integer|min:1900|max:' . (date('Y') + 5),
+            'category_id' => 'nullable|exists:book_categories,id',
+            'shelf'       => 'nullable|string|max:50',
+            'stock'       => 'nullable|integer|min:0',
             'description' => 'nullable|string',
-            'cover' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:10240',
+            'cover'       => 'nullable|image|mimes:jpeg,jpg,png,webp|max:10240',
+            'cover_url'   => 'nullable|string',
         ]);
+
+        if (empty($validated['category_id'])) {
+            $firstCategory = BookCategory::first();
+            $validated['category_id'] = $firstCategory ? $firstCategory->id : 1;
+        }
+
+        if (empty($validated['shelf'])) {
+            $validated['shelf'] = 'Rak Referensi';
+        }
+
+        if (!isset($validated['stock'])) {
+            $validated['stock'] = 1;
+        }
 
         if ($request->hasFile('cover')) {
             $path = $this->compressAndSaveImage($request->file('cover'), 'covers');
             $validated['cover'] = $path;
+        } elseif (!empty($request->input('cover_url'))) {
+            $validated['cover'] = $request->input('cover_url');
         }
 
         Book::create($validated);

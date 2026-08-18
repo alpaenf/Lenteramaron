@@ -20,7 +20,8 @@ import {
     Bell,
     ExternalLink,
     Shield,
-    Clock
+    Clock,
+    Sparkles
 } from 'lucide-vue-next';
 
 const page = usePage();
@@ -52,21 +53,27 @@ const logout = () => {
     router.post('/logout');
 };
 
-const navigation = [
-    { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, roles: ['Admin', 'Pustakawan', 'Guru', 'Kepala Sekolah'] },
-    { name: 'Master Buku', href: '/books', icon: BookMarked, roles: ['Admin', 'Pustakawan', 'Guru', 'Kepala Sekolah'] },
-    { name: 'Data Anggota', href: '/members', icon: Users, roles: ['Admin', 'Pustakawan', 'Guru', 'Kepala Sekolah'] },
-    { name: 'Buku Tamu', href: '/guest-books', icon: ClipboardList, roles: ['Admin', 'Pustakawan', 'Guru', 'Kepala Sekolah'] },
-    { name: 'Peminjaman', href: '/borrowings', icon: ArrowRightLeft, roles: ['Admin', 'Pustakawan'] },
-    { name: 'Pengembalian', href: '/returns', icon: RotateCcw, roles: ['Admin', 'Pustakawan'] },
-    { name: 'Laporan & Analytics', href: '/reports', icon: BarChart3, roles: ['Admin', 'Pustakawan', 'Guru', 'Kepala Sekolah'] },
-    { name: 'Galeri Kegiatan', href: '/galleries', icon: ImageIcon, roles: ['Admin', 'Pustakawan'] },
-    { name: 'Pengaturan Sistem', href: '/settings', icon: Settings, roles: ['Admin'] },
-];
-
 const filteredNav = computed(() => {
-    if (!user.value.role) return [];
-    return navigation.filter(item => item.roles.includes(user.value.role));
+    const roleLower = (user.value.role || '').toLowerCase();
+    
+    if (['admin', 'pustakawan', 'kepala_sekolah'].includes(roleLower)) {
+        return [
+            { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+            { name: 'AI Research Search', href: '/litera/search', icon: Sparkles },
+            { name: 'Research Workspace', href: '/litera/workspace', icon: BookOpen },
+            { name: 'Katalog Referensi', href: '/books', icon: BookMarked },
+            { name: 'Laporan & Analytics', href: '/reports', icon: BarChart3 },
+            { name: 'Galeri Kegiatan', href: '/galleries', icon: ImageIcon },
+            { name: 'Pengaturan Sistem', href: '/settings', icon: Settings },
+        ];
+    } else {
+        // Researcher / Educator / Student / User roles
+        return [
+            { name: 'Research Workspace', href: '/litera/workspace', icon: BookOpen },
+            { name: 'AI Research Search', href: '/litera/search', icon: Sparkles },
+            { name: 'Katalog Referensi', href: '/books', icon: BookMarked },
+        ];
+    }
 });
 
 const isCurrentRoute = (path) => {
@@ -136,11 +143,7 @@ const getGreeting = () => {
 
             <!-- Sidebar Footer Buttons -->
             <div class="pt-3 border-t border-outline-variant/30 space-y-2 mt-auto">
-                <Link href="/" target="_blank" class="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl border border-outline-variant/60 text-on-surface-variant hover:bg-surface-container-low text-xs font-bold transition-colors">
-                    <ExternalLink class="w-3.5 h-3.5" />
-                    <span>Lihat Web Publik</span>
-                </Link>
-                <button @click="logout" class="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-error-container/60 hover:bg-error-container text-on-error-container text-xs font-bold transition-colors">
+                <button @click="logout" class="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold transition-colors">
                     <LogOut class="w-3.5 h-3.5" />
                     <span>Keluar Akun</span>
                 </button>
@@ -164,9 +167,9 @@ const getGreeting = () => {
                 </div>
 
                 <div class="flex items-center gap-2 sm:gap-3 shrink-0">
-                    <Link href="/" target="_blank" title="Lihat Website Publik" class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface-container-low hover:bg-surface-container text-on-surface text-xs font-bold transition-colors border border-outline-variant/40">
-                        <ExternalLink class="w-3.5 h-3.5" />
-                        <span>Web Publik</span>
+                    <Link href="/" title="Kembali ke Beranda Utama" class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors border border-slate-200">
+                        <ExternalLink class="w-3.5 h-3.5 text-blue-600" />
+                        <span>Beranda Utama</span>
                     </Link>
 
                     <!-- Notification Button & Dropdown -->

@@ -2,18 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Exports\BorrowingsExport;
-use App\Exports\GuestBooksExport;
-use App\Exports\ReturnsExport;
 use App\Models\Book;
-use App\Models\Borrowing;
-use App\Models\GuestBook;
-use App\Models\ReturnBook;
+use App\Models\ExternalSource;
+use App\Models\ResearchTopic;
+use App\Models\SavedSource;
+use App\Models\SearchQuery;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
-use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Carbon;
 
 class ReportController extends Controller
@@ -22,29 +19,28 @@ class ReportController extends Controller
     {
         $startDate = $request->input('start_date', Carbon::now()->startOfMonth()->toDateString());
         $endDate = $request->input('end_date', Carbon::now()->endOfMonth()->toDateString());
-        $type = $request->input('type', 'borrowings');
+        $type = $request->input('type', 'search_queries');
 
         $reportData = [];
 
-        if ($type === 'borrowings') {
-            $reportData = Borrowing::with(['member', 'book'])
-                ->whereBetween('borrow_date', [$startDate, $endDate])
-                ->latest('borrow_date')
+        if ($type === 'search_queries') {
+            $reportData = SearchQuery::whereBetween('created_at', [$startDate . ' 00:00:00', $endDate . ' 23:59:59'])
+                ->latest()
                 ->get();
-        } elseif ($type === 'returns') {
-            $reportData = ReturnBook::with(['member', 'book', 'borrowing'])
-                ->whereBetween('return_date', [$startDate, $endDate])
-                ->latest('return_date')
+        } elseif ($type === 'saved_sources') {
+            $reportData = SavedSource::with(['book', 'externalSource', 'user', 'researchTopic'])
+                ->whereBetween('created_at', [$startDate . ' 00:00:00', $endDate . ' 23:59:59'])
+                ->latest()
                 ->get();
-        } elseif ($type === 'guest_books') {
-            $reportData = GuestBook::whereBetween('date', [$startDate, $endDate])
-                ->latest('date')
+        } elseif ($type === 'topics') {
+            $reportData = ResearchTopic::with('user')
+                ->withCount('savedSources')
+                ->whereBetween('created_at', [$startDate . ' 00:00:00', $endDate . ' 23:59:59'])
+                ->latest()
                 ->get();
-        } elseif ($type === 'popular_books') {
+        } elseif ($type === 'reference_books') {
             $reportData = Book::with('category')
-                ->withCount('borrowings')
-                ->orderBy('borrowings_count', 'desc')
-                ->take(20)
+                ->orderBy('title')
                 ->get();
         }
 
@@ -52,9 +48,15 @@ class ReportController extends Controller
             'reportData' => $reportData,
             'filters' => [
                 'start_date' => $startDate,
-                'end_date' => $endDate,
-                'type' => $type,
+                'end_date'   => $endDate,
+                'type'       => $type,
             ],
+            'summary' => [
+                'total_searches' => SearchQuery::count(),
+                'total_saved'    => SavedSource::count(),
+                'total_topics'   => ResearchTopic::count(),
+                'total_books'    => Book::count(),
+            ]
         ]);
     }
 
@@ -62,38 +64,35 @@ class ReportController extends Controller
     {
         $startDate = $request->input('start_date', Carbon::now()->startOfMonth()->toDateString());
         $endDate = $request->input('end_date', Carbon::now()->endOfMonth()->toDateString());
-        $type = $request->input('type', 'borrowings');
+        $type = $request->input('type', 'search_queries');
 
-        if ($type === 'borrowings') {
-            $data = Borrowing::with(['member', 'book'])
-                ->whereBetween('borrow_date', [$startDate, $endDate])
-                ->latest('borrow_date')
+        $title = "Laporan Analitis Penelitian & Literasi LITERA";
+        $reportData = [];
+
+        if ($type === 'search_queries') {
+            $reportData = SearchQuery::whereBetween('created_at', [$startDate . ' 00:00:00', $endDate . ' 23:59:59'])
+                ->latest()
                 ->get();
-            $pdf = Pdf::loadView('pdf.borrowings', compact('data', 'startDate', 'endDate'));
-            return $pdf->download('Laporan_Peminjaman_' . date('Ymd') . '.pdf');
-        } elseif ($type === 'returns') {
-            $data = ReturnBook::with(['member', 'book', 'borrowing'])
-                ->whereBetween('return_date', [$startDate, $endDate])
-                ->latest('return_date')
+            $title = "Laporan Riwayat Pencarian Riset AI";
+        } elseif ($type === 'saved_sources') {
+            $reportData = SavedSource::with(['book', 'externalSource', 'user'])
+                ->whereBetween('created_at', [$startDate . ' 00:00:00', $endDate . ' 23:59:59'])
+                ->latest()
                 ->get();
-            $pdf = Pdf::loadView('pdf.returns', compact('data', 'startDate', 'endDate'));
-            return $pdf->download('Laporan_Pengembalian_' . date('Ymd') . '.pdf');
-        } elseif ($type === 'guest_books') {
-            $data = GuestBook::whereBetween('date', [$startDate, $endDate])
-                ->latest('date')
+            $title = "Laporan Sumber Literatur Tersimpan di Workspace";
+        } elseif ($type === 'topics') {
+            $reportData = ResearchTopic::with('user')
+                ->withCount('savedSources')
+                ->whereBetween('created_at', [$startDate . ' 00:00:00', $endDate . ' 23:59:59'])
+                ->latest()
                 ->get();
-            $pdf = Pdf::loadView('pdf.guest_books', compact('data', 'startDate', 'endDate'));
-            return $pdf->download('Laporan_Buku_Tamu_' . date('Ymd') . '.pdf');
-        } elseif ($type === 'popular_books') {
-            $data = Book::with('category')
-                ->withCount('borrowings')
-                ->orderBy('borrowings_count', 'desc')
-                ->take(20)
-                ->get();
-            $pdf = Pdf::loadView('pdf.popular_books', compact('data'));
-            return $pdf->download('Laporan_Buku_Terpopuler_' . date('Ymd') . '.pdf');
+            $title = "Laporan Proyek & Topik Penelitian";
+        } elseif ($type === 'reference_books') {
+            $reportData = Book::with('category')->get();
+            $title = "Laporan Katalog Buku Referensi";
         }
 
-        return redirect()->back();
+        $pdf = Pdf::loadView('pdf.research_report', compact('reportData', 'startDate', 'endDate', 'type', 'title'));
+        return $pdf->download('LITERA_Laporan_' . ucfirst($type) . '_' . date('Ymd') . '.pdf');
     }
 }

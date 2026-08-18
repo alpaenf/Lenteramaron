@@ -14,7 +14,15 @@ class CheckRole
             return redirect()->route('login');
         }
 
-        if (! in_array($request->user()->role, $roles)) {
+        $userRole = strtolower(trim($request->user()->role ?? ''));
+        $allowedRoles = array_map('strtolower', array_map('trim', $roles));
+
+        // Admin / Pustakawan has access to admin routes
+        if (in_array($userRole, ['admin', 'pustakawan'])) {
+            return $next($request);
+        }
+
+        if (! in_array($userRole, $allowedRoles)) {
             abort(403, 'Anda tidak memiliki hak akses untuk membuka halaman ini.');
         }
 

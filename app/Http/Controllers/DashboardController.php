@@ -4,10 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Book;
 use App\Models\BookCategory;
-use App\Models\Borrowing;
-use App\Models\GuestBook;
-use App\Models\Member;
-use App\Models\ReturnBook;
+use App\Models\ExternalSource;
+use App\Models\ResearchTopic;
+use App\Models\SavedSource;
+use App\Models\SearchQuery;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -17,80 +17,24 @@ class DashboardController extends Controller
 {
     public function index(): Response
     {
-        $totalBooks = Book::sum('stock');
-        $totalMembers = Member::where('status', 'Aktif')->count();
-        $totalVisitors = GuestBook::count();
-        $totalBorrowings = Borrowing::count();
-        $totalReturns = ReturnBook::count();
+        $totalBooks = Book::count();
+        $totalSavedSources = SavedSource::count();
+        $totalSearches = SearchQuery::count();
+        $totalTopics = ResearchTopic::count();
+        $totalExternalCached = ExternalSource::count();
 
-        // Top 5 Popular Books
-        $popularBooks = Book::withCount('borrowings')
-            ->orderBy('borrowings_count', 'desc')
+        // Recent Search Queries Feed
+        $recentSearches = SearchQuery::latest()
+            ->take(8)
+            ->get();
+
+        // Recent Saved Sources in Workspace
+        $recentSaved = SavedSource::with(['book', 'externalSource', 'user'])
+            ->latest()
             ->take(5)
             ->get();
 
-        // Daily borrowing & returning trends for last 7 days
-        $daily7Days = [];
-        $daily7BorrowData = [];
-        $daily7ReturnData = [];
-
-        for ($i = 6; $i >= 0; $i--) {
-            $date = Carbon::now()->subDays($i);
-            $daily7Days[] = $date->translatedFormat('d M');
-
-            $daily7BorrowData[] = Borrowing::whereDate('borrow_date', $date->toDateString())->count();
-            $daily7ReturnData[] = ReturnBook::whereDate('return_date', $date->toDateString())->count();
-        }
-
-        // Daily borrowing & returning trends for last 30 days
-        $daily30Days = [];
-        $daily30BorrowData = [];
-        $daily30ReturnData = [];
-
-        for ($i = 29; $i >= 0; $i--) {
-            $date = Carbon::now()->subDays($i);
-            $daily30Days[] = $date->translatedFormat('d M');
-
-            $daily30BorrowData[] = Borrowing::whereDate('borrow_date', $date->toDateString())->count();
-            $daily30ReturnData[] = ReturnBook::whereDate('return_date', $date->toDateString())->count();
-        }
-
-        // Monthly borrowing & returning trends for 6 months
-        $months = [];
-        $borrowChartData = [];
-        $returnChartData = [];
-
-        for ($i = 5; $i >= 0; $i--) {
-            $monthDate = Carbon::now()->subMonths($i);
-            $monthLabel = $monthDate->translatedFormat('M Y');
-            $months[] = $monthLabel;
-
-            $borrowCount = Borrowing::whereYear('borrow_date', $monthDate->year)
-                ->whereMonth('borrow_date', $monthDate->month)
-                ->count();
-
-            $returnCount = ReturnBook::whereYear('return_date', $monthDate->year)
-                ->whereMonth('return_date', $monthDate->month)
-                ->count();
-
-            $borrowChartData[] = $borrowCount;
-            $returnChartData[] = $returnCount;
-        }
-
-        // Yearly borrowing & returning trends for 3 years
-        $yearlyYears = [];
-        $yearlyBorrowData = [];
-        $yearlyReturnData = [];
-
-        for ($i = 2; $i >= 0; $i--) {
-            $year = Carbon::now()->subYears($i)->year;
-            $yearlyYears[] = "Tahun {$year}";
-
-            $yearlyBorrowData[] = Borrowing::whereYear('borrow_date', $year)->count();
-            $yearlyReturnData[] = ReturnBook::whereYear('return_date', $year)->count();
-        }
-
-        // Category distribution (Pie Chart)
+        // Category distribution of Reference Books (Pie Chart)
         $categoryLabels = [];
         $categoryData = [];
 
@@ -102,48 +46,36 @@ class DashboardController extends Controller
             }
         }
 
-        // Recent Activity Feed
-        $recentBorrowings = Borrowing::with(['member', 'book'])
-            ->latest()
-            ->take(5)
-            ->get();
+        // Search trend data for last 7 days
+        $daily7Days = [];
+        $daily7SearchData = [];
+
+        for ($i = 6; $i >= 0; $i--) {
+            $date = Carbon::now()->subDays($i);
+            $daily7Days[] = $date->translatedFormat('d M');
+            $daily7SearchData[] = SearchQuery::whereDate('created_at', $date->toDateString())->count();
+        }
 
         return Inertia::render('Dashboard', [
             'stats' => [
-                'total_books' => $totalBooks,
-                'total_members' => $totalMembers,
-                'total_visitors' => $totalVisitors,
-                'total_borrowings' => $totalBorrowings,
-                'total_returns' => $totalReturns,
+                'total_books'           => $totalBooks,
+                'total_saved_sources'   => $totalSavedSources,
+                'total_searches'        => $totalSearches,
+                'total_topics'          => $totalTopics,
+                'total_external_cached' => $totalExternalCached,
             ],
-            'popular_books' => $popularBooks,
+            'recent_searches' => $recentSearches,
+            'recent_saved'    => $recentSaved,
             'charts' => [
                 'daily_7' => [
-                    'labels' => $daily7Days,
-                    'borrowings' => $daily7BorrowData,
-                    'returns' => $daily7ReturnData,
-                ],
-                'daily_30' => [
-                    'labels' => $daily30Days,
-                    'borrowings' => $daily30BorrowData,
-                    'returns' => $daily30ReturnData,
-                ],
-                'monthly' => [
-                    'labels' => $months,
-                    'borrowings' => $borrowChartData,
-                    'returns' => $returnChartData,
-                ],
-                'yearly' => [
-                    'labels' => $yearlyYears,
-                    'borrowings' => $yearlyBorrowData,
-                    'returns' => $yearlyReturnData,
+                    'labels'   => $daily7Days,
+                    'searches' => $daily7SearchData,
                 ],
                 'categories' => [
                     'labels' => $categoryLabels,
-                    'data' => $categoryData,
+                    'data'   => $categoryData,
                 ],
             ],
-            'recent_borrowings' => $recentBorrowings,
         ]);
     }
 }

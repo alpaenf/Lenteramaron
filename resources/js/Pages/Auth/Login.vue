@@ -27,36 +27,31 @@ const submit = () => {
 </script>
 
 <template>
-    <Head title="Login | Lentera Maron SDN 02 Maron" />
+    <Head title="Masuk — LITERA AI Research Navigator" />
 
-    <div class="text-on-background min-h-screen flex items-center justify-center p-3 md:p-6 bg-surface relative overflow-hidden">
+    <div class="text-on-background min-h-screen flex items-center justify-center p-3 md:p-6 bg-slate-50 relative overflow-hidden">
         <!-- Background Decoration Glows -->
         <div class="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
-            <div class="absolute -top-24 -left-24 w-96 h-96 bg-primary/10 rounded-full blur-3xl"></div>
-            <div class="absolute -bottom-24 -right-24 w-96 h-96 bg-secondary/15 rounded-full blur-3xl"></div>
+            <div class="absolute -top-24 -left-24 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl"></div>
+            <div class="absolute -bottom-24 -right-24 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl"></div>
         </div>
 
         <!-- Main Login Container Card -->
-        <main class="w-full max-w-[960px] flex flex-col md:flex-row bg-white rounded-3xl shadow-[0px_4px_30px_rgba(0,0,0,0.08)] overflow-hidden my-auto">
+        <main class="w-full max-w-[960px] flex flex-col md:flex-row bg-white rounded-3xl shadow-[0px_4px_30px_rgba(0,0,0,0.08)] overflow-hidden my-auto border border-slate-100">
             <!-- Left Side: Illustration & Branding -->
-            <section class="hidden md:flex md:w-1/2 bg-surface-container-low relative flex-col items-center justify-center p-8 lg:p-10 overflow-hidden border-r border-outline-variant/30">
+            <section class="hidden md:flex md:w-1/2 bg-gradient-to-br from-blue-900 via-slate-900 to-blue-950 text-white relative flex-col items-center justify-center p-8 lg:p-10 overflow-hidden">
                 <div class="relative z-10 text-center flex flex-col items-center">
-                    <img src="/images/logo.png" alt="Lentera Maron Logo" class="h-12 w-auto object-contain mb-4" />
+                    <img src="/images/logo.png" alt="LITERA Logo" class="h-12 w-auto object-contain mb-4" />
 
-                    <p class="text-on-surface-variant text-xs lg:text-sm max-w-xs mb-6 leading-relaxed">
-                        Jendela dunia bagi siswa-siswi cerdas masa depan. Mari mulai petualangan membaca hari ini!
+                    <h3 class="text-xl font-black text-white">LITERA</h3>
+                    <p class="text-blue-200 text-xs max-w-xs mb-6 leading-relaxed font-medium mt-1">
+                        AI-Powered Research &amp; Library Navigator. Menghubungkan koleksi referensi dengan sumber ilmiah internasional.
                     </p>
 
-                    <!-- Featured Library Image Card -->
-                    <div class="w-full max-w-xs aspect-video rounded-2xl overflow-hidden shadow-lg border-2 border-white transform -rotate-1 hover:rotate-0 transition-transform duration-500">
-                        <img src="/images/hero.png" alt="SDN 02 Maron Library" class="w-full h-full object-cover" />
+                    <!-- Featured Image Card -->
+                    <div class="w-full max-w-xs aspect-video rounded-2xl overflow-hidden shadow-lg border-2 border-white/20 transform -rotate-1 hover:rotate-0 transition-transform duration-500">
+                        <img src="/images/hero.png" alt="LITERA Platform" class="w-full h-full object-cover" />
                     </div>
-                </div>
-
-                <!-- Bottom Accent -->
-                <div class="absolute bottom-6 left-6 flex items-center gap-1.5 opacity-70">
-                    <span class="material-symbols-outlined text-secondary text-sm">verified</span>
-                    <span class="text-[10px] font-bold uppercase tracking-widest text-secondary">Sistem Lentera Maron</span>
                 </div>
             </section>
 
@@ -64,12 +59,12 @@ const submit = () => {
             <section class="w-full md:w-1/2 flex flex-col justify-center px-6 py-8 md:px-10 md:py-10 bg-white">
                 <!-- Mobile Header Only -->
                 <div class="flex items-center gap-3 mb-6 md:hidden">
-                    <img src="/images/logo.png" alt="Lentera Maron Logo" class="h-9 w-auto object-contain" />
+                    <img src="/images/logo.png" alt="LITERA Logo" class="h-9 w-auto object-contain" />
                 </div>
 
                 <div class="mb-6 text-left">
-                    <h2 class="text-xl sm:text-2xl font-extrabold text-on-surface mb-1 tracking-tight">Selamat Datang Kembali!</h2>
-                    <p class="text-xs text-on-surface-variant">Silakan masuk untuk mengelola katalog buku dan melayani siswa.</p>
+                    <h2 class="text-xl sm:text-2xl font-black text-slate-900 mb-1 tracking-tight">Selamat Datang di LITERA</h2>
+                    <p class="text-xs text-slate-500 font-medium">Silakan masuk ke akun Anda untuk mengelola referensi dan analitis riset.</p>
                 </div>
 
                 <!-- Status Flash Message -->
@@ -154,28 +149,21 @@ const submit = () => {
                     <button 
                         :disabled="form.processing" 
                         type="submit" 
-                        class="w-full py-3.5 bg-primary text-white rounded-xl font-bold shadow-md shadow-primary/20 hover:bg-primary-container active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-2 text-sm mt-2"
+                        class="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-md shadow-blue-500/20 active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-2 text-xs mt-2"
                     >
-                        <span>{{ form.processing ? 'Memproses...' : 'Masuk ke Panel Admin' }}</span>
-                        <span class="material-symbols-outlined text-lg">arrow_forward</span>
+                        <span>{{ form.processing ? 'Memproses...' : 'Masuk Sekarang' }}</span>
                     </button>
                 </form>
 
-                <!-- Help Support -->
-                <div class="mt-6 pt-4 border-t border-surface-container flex flex-col items-center gap-3">
-                    <p class="text-xs text-on-surface-variant text-center">
-                        Bukan Pustakawan? <Link href="/" class="text-secondary font-bold hover:underline ml-1">Kembali ke Beranda Utama</Link>
+                <!-- Register & Help Support -->
+                <div class="mt-6 pt-4 border-t border-slate-100 flex flex-col items-center gap-3">
+                    <p class="text-xs text-slate-500 text-center">
+                        Belum memiliki akun? 
+                        <Link href="/register" class="text-blue-600 font-extrabold hover:underline ml-1">Daftar Akun Baru</Link>
                     </p>
-                    <div class="flex gap-5 text-[11px] font-bold text-on-surface-variant">
-                        <Link href="/#buku-tamu" class="flex items-center gap-1 hover:text-primary transition-colors">
-                            <span class="material-symbols-outlined text-sm">help</span>
-                            <span class="tracking-wider">BANTUAN</span>
-                        </Link>
-                        <span class="flex items-center gap-1 text-outline">
-                            <span class="material-symbols-outlined text-sm">language</span>
-                            <span class="tracking-wider">INDONESIA</span>
-                        </span>
-                    </div>
+                    <p class="text-[11px] text-slate-400 text-center">
+                        <Link href="/" class="hover:text-blue-600 font-bold transition-colors">Kembali ke Beranda Utama</Link>
+                    </p>
                 </div>
             </section>
         </main>
