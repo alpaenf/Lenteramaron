@@ -162,7 +162,7 @@ class BookController extends Controller
     public function batchImportJson(Request $request)
     {
         $request->validate([
-            'rows' => 'required|array|min:1|max:1000',
+            'rows' => 'required|array|min:1|max:5000',
         ]);
 
         $rows = $request->input('rows');

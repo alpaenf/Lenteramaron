@@ -248,7 +248,7 @@ const handleFileSelect = (e) => {
 
                 const headers = parseCsvLine(lines[0]);
                 const rows = [];
-                const maxRows = Math.min(lines.length, 301);
+                const maxRows = Math.min(lines.length, 5001); // Max 5000 data rows
 
                 for (let i = 1; i < maxRows; i++) {
                     if (!lines[i] || !lines[i].trim()) continue;
@@ -267,7 +267,7 @@ const handleFileSelect = (e) => {
                 isParsingCsv.value = false;
             }
         };
-        reader.readAsText(file.slice(0, 1024 * 1024));
+        reader.readAsText(file); // Read full file, no byte limit
     }
 };
 
