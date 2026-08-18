@@ -247,29 +247,13 @@ const getFallbackUrl = (category) => {
                 </div>
 
                 <!-- Hero Right Illustration -->
-                <div class="lg:col-span-5 relative reveal-on-scroll reveal-delay-2">
-                    <div class="relative w-full max-w-md mx-auto">
-                        <!-- Curved Image Container -->
-                        <div class="rounded-[40px] overflow-hidden border-4 border-white shadow-2xl shadow-blue-900/10 bg-white aspect-[4/3]">
-                            <img class="w-full h-full object-cover transform hover:scale-105 transition-transform duration-700" 
+                <div class="lg:col-span-5 relative reveal-on-scroll reveal-delay-2 flex justify-center">
+                    <div class="relative w-full max-w-lg mx-auto">
+                        <!-- Curved Image Container (Uncropped Full View) -->
+                        <div class="rounded-[32px] overflow-hidden border-4 border-white shadow-2xl shadow-blue-900/15 bg-white">
+                            <img class="w-full h-auto object-contain transform hover:scale-[1.02] transition-transform duration-500" 
                                  alt="LITERA AI Research Navigator Platform" 
                                  :src="settings.hero_banner_path ? '/files-media/' + settings.hero_banner_path : '/images/hero1.png'"/>
-                        </div>
-
-                        <!-- Floating Badge Widget (Bottom Right) -->
-                        <div class="absolute -bottom-6 -right-2 sm:right-2 bg-white/95 backdrop-blur-md p-4 rounded-3xl shadow-2xl border border-slate-100 flex items-center gap-3 z-20 max-w-xs animate-float-wobble">
-                            <div class="w-11 h-11 rounded-2xl bg-blue-100 flex items-center justify-center text-blue-600 shrink-0 font-bold">
-                                <Sparkles class="w-5 h-5 text-blue-600" />
-                            </div>
-                            <div>
-                                <p class="text-xs font-extrabold text-slate-900 flex items-center gap-1">
-                                    <span>AI Discovery Engine</span>
-                                </p>
-                                <p class="text-[10px] text-slate-500 font-medium">Temukan &amp; pahami jurnal ilmiah secara presisi</p>
-                                <Link href="/litera/search" class="mt-1.5 inline-block bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-bold px-3.5 py-1.5 rounded-full shadow-md shadow-blue-500/20 transition-all">
-                                    Mulai Pencarian
-                                </Link>
-                            </div>
                         </div>
                     </div>
                 </div>

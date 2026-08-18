@@ -49,8 +49,8 @@ const submit = () => {
                     </p>
 
                     <!-- Featured Image Card -->
-                    <div class="w-full max-w-xs aspect-video rounded-2xl overflow-hidden shadow-lg border-2 border-white/20 transform -rotate-1 hover:rotate-0 transition-transform duration-500">
-                        <img src="/images/hero1.png" alt="LITERA Platform" class="w-full h-full object-cover" />
+                    <div class="w-full max-w-xs rounded-2xl overflow-hidden shadow-lg border-2 border-white/20 transform -rotate-1 hover:rotate-0 transition-transform duration-500 bg-white/5">
+                        <img src="/images/hero1.png" alt="LITERA Platform" class="w-full h-auto object-contain" />
                     </div>
                 </div>
             </section>
