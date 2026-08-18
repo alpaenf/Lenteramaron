@@ -28,6 +28,7 @@ Route::post('/buku-tamu/simpan', [LandingController::class, 'storeGuest'])->name
 Route::get('/litera/search', [LiteraSearchController::class, 'index'])->name('litera.search');
 Route::post('/litera/api/search', [LiteraSearchController::class, 'search'])->name('litera.api.search');
 Route::post('/litera/api/explain', [LiteraSearchController::class, 'explain'])->name('litera.api.explain');
+Route::post('/litera/api/analyze', [LiteraSearchController::class, 'analyze'])->name('litera.api.analyze');
 Route::post('/litera/api/path', [LiteraSearchController::class, 'generatePath'])->name('litera.api.path');
 
 Route::get('/files-media/{path}', function ($path) {

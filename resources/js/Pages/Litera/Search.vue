@@ -59,6 +59,31 @@ const isPathModalOpen = ref(false);
 const isPathLoading = ref(false);
 const researchPathSteps = ref([]);
 
+// Deep Content Analysis Modal State
+const isAnalyzeModalOpen = ref(false);
+const selectedItemForAnalyze = ref(null);
+const analysisData = ref(null);
+const isAnalyzeLoading = ref(false);
+
+const openAnalyzeModal = async (item) => {
+    selectedItemForAnalyze.value = item;
+    isAnalyzeModalOpen.value = true;
+    analysisData.value = null;
+    isAnalyzeLoading.value = true;
+
+    try {
+        const res = await axios.post('/litera/api/analyze', {
+            q: query.value,
+            item: item
+        });
+        analysisData.value = res.data.analysis;
+    } catch (e) {
+        showToast('Gagal melakukan analisis isi.', 'error');
+    } finally {
+        isAnalyzeLoading.value = false;
+    }
+};
+
 // Reader Modal State
 const isReaderModalOpen = ref(false);
 const readerItem = ref(null);
@@ -420,13 +445,23 @@ const filteredItems = computed(() => {
 
                             <!-- Card Action Footer -->
                             <div class="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-xs">
-                                <button
-                                    @click="openExplainModal(item)"
-                                    class="inline-flex items-center gap-1.5 text-blue-600 hover:text-blue-800 font-bold"
-                                >
-                                    <HelpCircle class="w-4 h-4 text-blue-600" />
-                                    <span>Mengapa Relevan?</span>
-                                </button>
+                                <div class="flex items-center gap-3">
+                                    <button
+                                        @click="openExplainModal(item)"
+                                        class="inline-flex items-center gap-1.5 text-blue-600 hover:text-blue-800 font-bold"
+                                    >
+                                        <HelpCircle class="w-4 h-4 text-blue-600" />
+                                        <span>Mengapa Relevan?</span>
+                                    </button>
+
+                                    <button
+                                        @click="openAnalyzeModal(item)"
+                                        class="inline-flex items-center gap-1.5 text-purple-600 hover:text-purple-800 font-bold"
+                                    >
+                                        <Sparkles class="w-4 h-4 text-purple-600" />
+                                        <span>Bedah Isi AI</span>
+                                    </button>
+                                </div>
 
                                 <div class="flex items-center gap-2">
                                     <!-- Smart Read Button -->
@@ -622,6 +657,87 @@ const filteredItems = computed(() => {
                             <p class="text-xs text-slate-400">{{ readerItem.url }}</p>
                         </div>
                     </template>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================ -->
+        <!-- DEEP CONTENT ANALYSIS MODAL                 -->
+        <!-- ============================================ -->
+        <div v-if="isAnalyzeModalOpen" class="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4">
+            <div class="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl space-y-5 border border-purple-100 max-h-[90vh] overflow-y-auto">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center font-bold">
+                            <Sparkles class="w-4 h-4 text-purple-600" />
+                        </div>
+                        <div>
+                            <span class="text-[10px] font-extrabold uppercase tracking-wider text-purple-600 bg-purple-50 px-2 py-0.5 rounded-full">AI Deep Synthesizer</span>
+                            <h3 class="font-bold text-slate-900 text-base leading-tight mt-0.5">Bedah Isi & Analisis Akademis</h3>
+                        </div>
+                    </div>
+                    <button @click="isAnalyzeModalOpen = false" class="p-1.5 rounded-xl text-slate-400 hover:bg-slate-100 transition">
+                        <X class="w-5 h-5" />
+                    </button>
+                </div>
+
+                <div v-if="selectedItemForAnalyze" class="space-y-4">
+                    <!-- Title Header -->
+                    <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200/70">
+                        <h4 class="font-bold text-slate-900 text-sm leading-snug">{{ selectedItemForAnalyze.title }}</h4>
+                        <p class="text-xs text-slate-500 mt-1 font-medium" v-if="selectedItemForAnalyze.author">Penulis: {{ selectedItemForAnalyze.author }}</p>
+                    </div>
+
+                    <!-- Loading State -->
+                    <div v-if="isAnalyzeLoading" class="py-12 text-center text-slate-500 space-y-3">
+                        <Loader2 class="animate-spin h-8 w-8 text-purple-600 mx-auto" />
+                        <p class="font-medium text-xs text-purple-900">Sedang membedah struktur isi literatur dengan Groq AI...</p>
+                    </div>
+
+                    <!-- Analysis Result Sections -->
+                    <div v-else-if="analysisData" class="space-y-4 text-xs">
+                        <!-- 1. Fokus Utama -->
+                        <div class="bg-purple-50/70 p-4 rounded-2xl border border-purple-100 space-y-1">
+                            <h5 class="font-extrabold text-purple-900 text-xs flex items-center gap-1.5">
+                                <span>📌</span>
+                                <span>Fokus & Ruang Lingkup Utama</span>
+                            </h5>
+                            <p class="text-slate-700 font-medium leading-relaxed">{{ analysisData.fokus_utama }}</p>
+                        </div>
+
+                        <!-- 2. Metodologi & Pendekatan -->
+                        <div class="bg-blue-50/70 p-4 rounded-2xl border border-blue-100 space-y-1">
+                            <h5 class="font-extrabold text-blue-900 text-xs flex items-center gap-1.5">
+                                <span>🛠️</span>
+                                <span>Metodologi & Kerangka Pendekatan</span>
+                            </h5>
+                            <p class="text-slate-700 font-medium leading-relaxed">{{ analysisData.metodologi_pendekatan }}</p>
+                        </div>
+
+                        <!-- 3. Temuan & Kontribusi -->
+                        <div class="bg-emerald-50/70 p-4 rounded-2xl border border-emerald-100 space-y-1">
+                            <h5 class="font-extrabold text-emerald-900 text-xs flex items-center gap-1.5">
+                                <span>💡</span>
+                                <span>Temuan Kunci & Kontribusi Pengetahuan</span>
+                            </h5>
+                            <p class="text-slate-700 font-medium leading-relaxed whitespace-pre-line">{{ analysisData.temuan_kontribusi }}</p>
+                        </div>
+
+                        <!-- 4. Implikasi Riset -->
+                        <div class="bg-amber-50/70 p-4 rounded-2xl border border-amber-100 space-y-1">
+                            <h5 class="font-extrabold text-amber-900 text-xs flex items-center gap-1.5">
+                                <span>🔍</span>
+                                <span>Rekomendasi Implikasi & Penggunaan Riset</span>
+                            </h5>
+                            <p class="text-slate-700 font-medium leading-relaxed">{{ analysisData.implikasi_riset }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-2 border-t border-slate-100 text-right">
+                    <button @click="isAnalyzeModalOpen = false" class="px-5 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl text-xs shadow-md transition">
+                        Tutup Bedah AI
+                    </button>
                 </div>
             </div>
         </div>

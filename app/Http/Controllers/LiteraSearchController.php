@@ -109,4 +109,24 @@ class LiteraSearchController extends Controller
             'steps' => $steps,
         ]);
     }
+
+    /**
+     * Async Deep AI Content Analysis Endpoint.
+     */
+    public function analyze(Request $request): JsonResponse
+    {
+        $request->validate([
+            'q'    => 'required|string',
+            'item' => 'required|array',
+        ]);
+
+        $analysis = $this->groqService->analyzeContent(
+            $request->input('q'),
+            $request->input('item')
+        );
+
+        return response()->json([
+            'analysis' => $analysis,
+        ]);
+    }
 }

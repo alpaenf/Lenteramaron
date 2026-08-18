@@ -137,7 +137,60 @@ class GroqService
             Log::warning("LLM API Explain Relevance Warning: " . $e->getMessage());
         }
 
-        return $this->fallbackExplainRelevance($query, $title, $type);
+    /**
+     * Deeply analyze the content structure and insights of a book/paper reference.
+     */
+    public function analyzeContent(string $query, array $item): array
+    {
+        $title = $item['title'] ?? 'Tanpa Judul';
+        $author = $item['author'] ?? ($item['authors'][0] ?? 'Penulis');
+        $abstract = $item['abstract'] ?? ($item['description'] ?? '');
+        $type = $item['source_type'] === 'local' ? 'Buku Referensi Perpustakaan' : 'Jurnal/Paper Ilmiah Eksternal';
+        $category = $item['category_name'] ?? 'Umum';
+
+        if (empty($this->apiKey)) {
+            return $this->fallbackAnalyzeContent($title, $abstract, $query);
+        }
+
+        try {
+            $prompt = "Lakukan bedah analisis akademis mendalam untuk literatur berikut terkait topik pencarian: \"{$query}\".\n"
+                . "Judul: \"{$title}\"\n"
+                . "Penulis: \"{$author}\"\n"
+                . "Kategori/Tipe: {$type} ({$category})\n"
+                . "Abstrak/Deskripsi: \"{$abstract}\"\n\n"
+                . "Kembalikan HANYA JSON murni (tanpa markdown backtick) dengan format persis berikut:\n"
+                . "{\n"
+                . "  \"fokus_utama\": \"Penjelasan 2 kalimat fokus dan ruang lingkup utama literatur ini.\",\n"
+                . "  \"metodologi_pendekatan\": \"Penjelasan metode, arsitektur, atau sudut pandang yang digunakan dalam buku/paper ini.\",\n"
+                . "  \"temuan_kontribusi\": \"3 poin utama temuan kunci atau kontribusi ilmiah literatur ini.\",\n"
+                . "  \"implikasi_riset\": \"Bagaimana literatur ini bisa dipakai dan dikutip dalam penelitian Anda.\"\n"
+                . "}";
+
+            $response = Http::timeout($this->timeout)
+                ->withHeaders([
+                    'Authorization' => 'Bearer ' . $this->apiKey,
+                    'Content-Type'  => 'application/json',
+                ])
+                ->post($this->getEndpointUrl(), [
+                    'model' => $this->model,
+                    'messages' => [
+                        ['role' => 'user', 'content' => $prompt]
+                    ],
+                    'temperature' => 0.3,
+                ]);
+
+            if ($response->successful()) {
+                $content = $response->json('choices.0.message.content') ?? '';
+                $decoded = $this->parseJsonFromContent($content);
+                if (isset($decoded['fokus_utama'])) {
+                    return $decoded;
+                }
+            }
+        } catch (\Throwable $e) {
+            Log::warning("LLM API Analyze Content Warning: " . $e->getMessage());
+        }
+
+        return $this->fallbackAnalyzeContent($title, $abstract, $query);
     }
 
     /**
@@ -261,6 +314,14 @@ class GroqService
                 'description' => 'Menentukan celah penelitian serta implikasi praktis untuk kajian mendatang.',
                 'recommended_source_title' => 'Sintesis Literatur LITERA',
             ],
+        ];
+    protected function fallbackAnalyzeContent(string $title, string $abstract, string $query): array
+    {
+        return [
+            'fokus_utama' => "Literatur \"{$title}\" membahas konsep utama yang erat kaitannya dengan pembahasan \"{$query}\".",
+            'metodologi_pendekatan' => "Menggunakan tinjauan akademis dan studi kerangka teoritis dalam struktur pembahasannya.",
+            'temuan_kontribusi' => "Menyediakan landasan pustaka yang solid dan rujukan terminologi penting untuk kajian riset.",
+            'implikasi_riset' => "Sangat cocok dijadikan acuan latar belakang masalah dan landasan teori dalam susunan skripsi/makalah.",
         ];
     }
 }
