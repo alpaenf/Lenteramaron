@@ -147,6 +147,8 @@ class GroqService
     {
         $title = $item['title'] ?? 'Tanpa Judul';
         $author = $item['author'] ?? ($item['authors'][0] ?? 'Penulis');
+        $publisher = $item['publisher_or_journal'] ?? 'Penerbit/Jurnal';
+        $year = $item['publication_year'] ?? date('Y');
         $abstract = $item['abstract'] ?? ($item['description'] ?? '');
         $type = $item['source_type'] === 'local' ? 'Buku Referensi Perpustakaan' : 'Jurnal/Paper Ilmiah Eksternal';
         $category = $item['category_name'] ?? 'Umum';
@@ -156,17 +158,25 @@ class GroqService
         }
 
         try {
-            $prompt = "Lakukan bedah analisis akademis mendalam untuk literatur berikut terkait topik pencarian: \"{$query}\".\n"
-                . "Judul: \"{$title}\"\n"
-                . "Penulis: \"{$author}\"\n"
-                . "Kategori/Tipe: {$type} ({$category})\n"
-                . "Abstrak/Deskripsi: \"{$abstract}\"\n\n"
-                . "Kembalikan HANYA JSON murni (tanpa markdown backtick) dengan format persis berikut:\n"
+            $prompt = "Sebagai asisten peneliti akademis senior, buatkan bedah analisis komprehensif dan sangat detail untuk literatur berikut terkait topik pencarian riset: \"{$query}\".\n\n"
+                . "INFORMASI LITERATUR:\n"
+                . "- Judul: \"{$title}\"\n"
+                . "- Penulis: \"{$author}\"\n"
+                . "- Penerbit/Jurnal: \"{$publisher}\" ({$year})\n"
+                . "- Kategori/Tipe: {$type} ({$category})\n"
+                . "- Abstrak/Ringkasan: \"{$abstract}\"\n\n"
+                . "BERIKAN OUTPUT HANYA DALAM FORMAT JSON MURNI (tanpa markdown codeblock ```json) DENGAN STRUKTUR BERIKUT:\n"
                 . "{\n"
-                . "  \"fokus_utama\": \"Penjelasan 2 kalimat fokus dan ruang lingkup utama literatur ini.\",\n"
-                . "  \"metodologi_pendekatan\": \"Penjelasan metode, arsitektur, atau sudut pandang yang digunakan dalam buku/paper ini.\",\n"
-                . "  \"temuan_kontribusi\": \"3 poin utama temuan kunci atau kontribusi ilmiah literatur ini.\",\n"
-                . "  \"implikasi_riset\": \"Bagaimana literatur ini bisa dipakai dan dikutip dalam penelitian Anda.\"\n"
+                . "  \"fokus_utama\": \"Penjelasan mendalam 3-4 kalimat mengenai latar belakang, rumusan masalah inti, dan ruang lingkup kajian dalam literatur ini.\",\n"
+                . "  \"metodologi_pendekatan\": \"Penjelasan teknis dan teoritis mengenai metode riset, pendekatan analisis data, arsitektur pemikiran, atau sampel yang dibahas.\",\n"
+                . "  \"temuan_kontribusi\": [\n"
+                . "    \"Temuan Kunci 1: penjelasan detail hasil atau pemikiran utama.\",\n"
+                . "    \"Temuan Kunci 2: kontribusi keilmuan atau fakta akademis penting.\",\n"
+                . "    \"Temuan Kunci 3: implikasi praktis atau konsep temuan pendukung.\"\n"
+                . "  ],\n"
+                . "  \"kata_kunci_konsep\": [\"Istilah Kunci 1\", \"Istilah Kunci 2\", \"Konsep 3\", \"Metode 4\"],\n"
+                . "  \"rekomendasi_bab\": \"Bab 2 (Landasan Teori) & Bab 1 (Latar Belakang)\",\n"
+                . "  \"implikasi_riset\": \"Panduan mendalam 3 kalimat tentang cara mengintegrasikan literatur ini ke dalam riset Anda, bagian skripsi mana yang didukung, serta celah riset (research gap) yang bisa dikembangkan lebih lanjut.\"\n"
                 . "}";
 
             $response = Http::timeout($this->timeout)
@@ -323,10 +333,16 @@ class GroqService
     protected function fallbackAnalyzeContent(string $title, string $abstract, string $query): array
     {
         return [
-            'fokus_utama' => "Literatur \"{$title}\" membahas konsep utama yang erat kaitannya dengan pembahasan \"{$query}\".",
-            'metodologi_pendekatan' => "Menggunakan tinjauan akademis dan studi kerangka teoritis dalam struktur pembahasannya.",
-            'temuan_kontribusi' => "Menyediakan landasan pustaka yang solid dan rujukan terminologi penting untuk kajian riset.",
-            'implikasi_riset' => "Sangat cocok dijadikan acuan latar belakang masalah dan landasan teori dalam susunan skripsi/makalah.",
+            'fokus_utama' => "Literatur \"{$title}\" membahas konsep dan kerangka teoritis utama yang erat kaitannya dengan subjek riset \"{$query}\". Studi ini mengeksplorasi latar belakang fundamental serta implikasi utamanya.",
+            'metodologi_pendekatan' => "Menggunakan tinjauan pustaka akademis (literature review), sintesis data kualitatif, serta analisis studi kasus berorientasi bidang keilmuan terkait.",
+            'temuan_kontribusi' => [
+                "Menyediakan pemahaman struktur dasar mengenai " . $query,
+                "Menguraikan rujukan terminologi dan kerangka konseptual yang baku",
+                "Memberikan sintesis latar belakang yang dapat dirujuk sebagai tinjauan akademis"
+            ],
+            'kata_kunci_konsep' => [$query, 'Tinjauan Literatur', 'Kerangka Teori', 'Metodologi Riset'],
+            'rekomendasi_bab' => 'Bab 2 (Landasan Teori) & Bab 1 (Latar Belakang)',
+            'implikasi_riset' => "Sangat cocok dijadikan acuan latar belakang masalah dan landasan teori dalam susunan makalah atau skripsi. Peneliti dapat menggunakannya untuk memperkuat argumen akademis.",
         ];
     }
 }

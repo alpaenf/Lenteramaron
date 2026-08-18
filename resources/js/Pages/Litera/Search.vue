@@ -21,7 +21,10 @@ import {
     FileSpreadsheet,
     Pin,
     Wrench,
-    Lightbulb
+    Lightbulb,
+    Tag,
+    BookMarked,
+    CheckCircle2
 } from 'lucide-vue-next';
 
 const props = defineProps({
@@ -699,8 +702,15 @@ const filteredItems = computed(() => {
 
                     <!-- Analysis Result Sections -->
                     <div v-else-if="analysisData" class="space-y-4 text-xs">
+                        <!-- Recommended Chapter Tag -->
+                        <div v-if="analysisData.rekomendasi_bab" class="flex items-center gap-2 bg-purple-100/80 px-3.5 py-2 rounded-xl text-purple-900 border border-purple-200">
+                            <BookMarked class="w-4 h-4 text-purple-700 shrink-0" />
+                            <span class="font-extrabold text-xs">Rekomendasi Sitasi Skripsi/Makalah:</span>
+                            <span class="bg-white px-2.5 py-0.5 rounded-md font-black text-purple-800 text-[11px] border border-purple-200">{{ analysisData.rekomendasi_bab }}</span>
+                        </div>
+
                         <!-- 1. Fokus Utama -->
-                        <div class="bg-purple-50/70 p-4 rounded-2xl border border-purple-100 space-y-1">
+                        <div class="bg-purple-50/70 p-4 rounded-2xl border border-purple-100 space-y-1.5">
                             <h5 class="font-extrabold text-purple-900 text-xs flex items-center gap-2">
                                 <Pin class="w-4 h-4 text-purple-600 shrink-0" />
                                 <span>Fokus & Ruang Lingkup Utama</span>
@@ -709,7 +719,7 @@ const filteredItems = computed(() => {
                         </div>
 
                         <!-- 2. Metodologi & Pendekatan -->
-                        <div class="bg-blue-50/70 p-4 rounded-2xl border border-blue-100 space-y-1">
+                        <div class="bg-blue-50/70 p-4 rounded-2xl border border-blue-100 space-y-1.5">
                             <h5 class="font-extrabold text-blue-900 text-xs flex items-center gap-2">
                                 <Wrench class="w-4 h-4 text-blue-600 shrink-0" />
                                 <span>Metodologi & Kerangka Pendekatan</span>
@@ -717,20 +727,39 @@ const filteredItems = computed(() => {
                             <p class="text-slate-700 font-medium leading-relaxed">{{ analysisData.metodologi_pendekatan }}</p>
                         </div>
 
-                        <!-- 3. Temuan & Kontribusi -->
-                        <div class="bg-emerald-50/70 p-4 rounded-2xl border border-emerald-100 space-y-1">
+                        <!-- 3. Temuan Kunci & Kontribusi -->
+                        <div class="bg-emerald-50/70 p-4 rounded-2xl border border-emerald-100 space-y-2">
                             <h5 class="font-extrabold text-emerald-900 text-xs flex items-center gap-2">
                                 <Lightbulb class="w-4 h-4 text-emerald-600 shrink-0" />
                                 <span>Temuan Kunci & Kontribusi Pengetahuan</span>
                             </h5>
-                            <p class="text-slate-700 font-medium leading-relaxed whitespace-pre-line">{{ analysisData.temuan_kontribusi }}</p>
+                            <div v-if="Array.isArray(analysisData.temuan_kontribusi)" class="space-y-1.5 pl-1">
+                                <div v-for="(item, idx) in analysisData.temuan_kontribusi" :key="idx" class="flex items-start gap-2 text-slate-700 font-medium leading-relaxed">
+                                    <CheckCircle2 class="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
+                                    <span>{{ item }}</span>
+                                </div>
+                            </div>
+                            <p v-else class="text-slate-700 font-medium leading-relaxed whitespace-pre-line">{{ analysisData.temuan_kontribusi }}</p>
                         </div>
 
-                        <!-- 4. Implikasi Riset -->
-                        <div class="bg-amber-50/70 p-4 rounded-2xl border border-amber-100 space-y-1">
+                        <!-- 4. Kata Kunci & Konsep -->
+                        <div v-if="analysisData.kata_kunci_konsep && analysisData.kata_kunci_konsep.length > 0" class="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 space-y-2">
+                            <h5 class="font-extrabold text-slate-800 text-xs flex items-center gap-2">
+                                <Tag class="w-4 h-4 text-slate-600 shrink-0" />
+                                <span>Konsep & Istilah Utama</span>
+                            </h5>
+                            <div class="flex flex-wrap gap-1.5">
+                                <span v-for="(kw, idx) in analysisData.kata_kunci_konsep" :key="idx" class="bg-white text-slate-700 font-bold px-2.5 py-1 rounded-lg border border-slate-200 text-[11px]">
+                                    #{{ kw }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- 5. Implikasi Riset & Petunjuk Integrasi -->
+                        <div class="bg-amber-50/70 p-4 rounded-2xl border border-amber-100 space-y-1.5">
                             <h5 class="font-extrabold text-amber-900 text-xs flex items-center gap-2">
                                 <Search class="w-4 h-4 text-amber-600 shrink-0" />
-                                <span>Rekomendasi Implikasi & Penggunaan Riset</span>
+                                <span>Petunjuk Integrasi & Potensi Riset Lanjutan</span>
                             </h5>
                             <p class="text-slate-700 font-medium leading-relaxed">{{ analysisData.implikasi_riset }}</p>
                         </div>
