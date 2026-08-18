@@ -23,30 +23,44 @@ class AcademicAggregatorService
     public function search(string $query, int $limit = 20): array
     {
         $cacheKey = 'litera_academic_' . md5(strtolower(trim($query)));
-        // Use 2 hour TTL so stale empty results expire quickly
         $ttl = now()->addHours(2);
 
         $cached = Cache::get($cacheKey);
-        // Only use cache if it has actual results
         if ($cached !== null && count($cached) > 0) {
             return $cached;
         }
 
+        $halfLimit = max(5, (int) ceil($limit / 2));
+
+        // 1. Fetch from OpenAlex
+        $openAlexRaw = $this->openAlex->search($query, $halfLimit);
+        
+        // 2. Fetch from Semantic Scholar
+        $s2Raw = $this->semanticScholar->search($query, $halfLimit);
+
+        // 3. Persist and format
+        $openAlexResults = [];
+        foreach ($openAlexRaw as $item) {
+            $openAlexResults[] = $this->persistExternalSource($item);
+        }
+
+        $s2Results = [];
+        foreach ($s2Raw as $item) {
+            $s2Results[] = $this->persistExternalSource($item);
+        }
+
+        // 4. Interleave results (1 OpenAlex, 1 Semantic Scholar...)
         $results = [];
-
-        // 1. Primary search: OpenAlex
-        $openAlexResults = $this->openAlex->search($query, $limit);
-        foreach ($openAlexResults as $item) {
-            $results[] = $this->persistExternalSource($item);
+        $maxCount = max(count($openAlexResults), count($s2Results));
+        for ($i = 0; $i < $maxCount; $i++) {
+            if (isset($openAlexResults[$i])) {
+                $results[] = $openAlexResults[$i];
+            }
+            if (isset($s2Results[$i])) {
+                $results[] = $s2Results[$i];
+            }
         }
 
-        // 2. Supplement with Semantic Scholar
-        $s2Results = $this->semanticScholar->search($query, max(5, $limit - count($results)));
-        foreach ($s2Results as $item) {
-            $results[] = $this->persistExternalSource($item);
-        }
-
-        // Only cache non-empty results
         if (count($results) > 0) {
             Cache::put($cacheKey, $results, $ttl);
         }

@@ -25,15 +25,21 @@ class SemanticScholarService
     {
         try {
             $response = Http::timeout($this->timeout)
+                ->withHeaders([
+                    'User-Agent' => 'LITERA-LibraryNavigator/1.0 (mailto:admin@sdn02maron.sch.id)',
+                    'Accept'     => 'application/json',
+                ])
                 ->get("{$this->baseUrl}/paper/search", [
                     'query'  => $query,
-                    'limit'  => min($limit, $this->limit),
+                    'limit'  => min($limit, 20),
                     'fields' => 'paperId,title,abstract,authors,year,venue,citationCount,isOpenAccess,openAccessPdf,url,externalIds',
                 ]);
 
             if ($response->successful()) {
                 $data = $response->json('data') ?? [];
                 return array_map([$this, 'formatPaper'], $data);
+            } else {
+                Log::warning("SemanticScholar HTTP Error: Status " . $response->status() . " Body: " . substr($response->body(), 0, 200));
             }
         } catch (\Throwable $e) {
             Log::warning("SemanticScholar Service Error: " . $e->getMessage());
