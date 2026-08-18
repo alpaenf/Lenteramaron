@@ -41,7 +41,7 @@ const submit = () => {
             <!-- Left Side: Illustration & Branding -->
             <section class="hidden md:flex md:w-1/2 bg-gradient-to-br from-blue-900 via-slate-900 to-blue-950 text-white relative flex-col items-center justify-center p-8 lg:p-10 overflow-hidden">
                 <div class="relative z-10 text-center flex flex-col items-center">
-                    <img src="/images/logo.png" alt="LITERA Logo" class="h-12 w-auto object-contain mb-4" />
+                    <img src="/images/logo2.png" alt="LITERA Logo" class="h-12 w-auto object-contain mb-4" />
 
                     <h3 class="text-xl font-black text-white">LITERA</h3>
                     <p class="text-blue-200 text-xs max-w-xs mb-6 leading-relaxed font-medium mt-1">
@@ -59,7 +59,7 @@ const submit = () => {
             <section class="w-full md:w-1/2 flex flex-col justify-center px-6 py-8 md:px-10 md:py-10 bg-white">
                 <!-- Mobile Header Only -->
                 <div class="flex items-center gap-3 mb-6 md:hidden">
-                    <img src="/images/logo.png" alt="LITERA Logo" class="h-9 w-auto object-contain" />
+                    <img src="/images/logo2.png" alt="LITERA Logo" class="h-9 w-auto object-contain" />
                 </div>
 
                 <div class="mb-6 text-left">
