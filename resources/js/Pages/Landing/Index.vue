@@ -247,14 +247,11 @@ const getFallbackUrl = (category) => {
                 </div>
 
                 <!-- Hero Right Illustration -->
-                <div class="lg:col-span-5 relative reveal-on-scroll reveal-delay-2 flex justify-center">
+                <div class="lg:col-span-5 relative reveal-on-scroll reveal-delay-2 flex justify-center items-center">
                     <div class="relative w-full max-w-lg mx-auto">
-                        <!-- Curved Image Container (Uncropped Full View) -->
-                        <div class="rounded-[32px] overflow-hidden border-4 border-white shadow-2xl shadow-blue-900/15 bg-white">
-                            <img class="w-full h-auto object-contain transform hover:scale-[1.02] transition-transform duration-500" 
-                                 alt="LITERA AI Research Navigator Platform" 
-                                 :src="settings.hero_banner_path ? '/files-media/' + settings.hero_banner_path : '/images/hero1.png'"/>
-                        </div>
+                        <img class="w-full h-auto object-contain drop-shadow-2xl transform hover:scale-[1.03] transition-transform duration-500" 
+                             alt="LITERA AI Research Navigator Platform" 
+                             :src="settings.hero_banner_path ? '/files-media/' + settings.hero_banner_path : '/images/hero1.png'"/>
                     </div>
                 </div>
             </div>
