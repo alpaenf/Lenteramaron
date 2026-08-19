@@ -6,19 +6,13 @@ use App\Models\Book;
 use App\Models\BookCategory;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
-use Maatwebsite\Excel\Concerns\WithLimit;
 use Maatwebsite\Excel\Concerns\WithChunkReading;
 
-class BooksImport implements ToModel, WithHeadingRow, WithLimit, WithChunkReading
+class BooksImport implements ToModel, WithHeadingRow, WithChunkReading
 {
-    public function limit(): int
-    {
-        return 500; // Limit to 500 rows per upload batch for instant execution & zero timeout
-    }
-
     public function chunkSize(): int
     {
-        return 100;
+        return 500;
     }
 
     public function model(array $row)
@@ -36,11 +30,29 @@ class BooksImport implements ToModel, WithHeadingRow, WithLimit, WithChunkReadin
             return null; // Skip empty or title-less rows
         }
 
+        $titleClean = mb_substr(trim((string)$title), 0, 255);
+
         // 2. Flexible ISBN Detection
-        $isbn = $cleanRow['isbn'] ?? $cleanRow['isbn13'] ?? $cleanRow['isbn10'] ?? $cleanRow['book_isbn'] ?? $cleanRow['bookisbn'] ?? null;
+        $isbnRaw = $cleanRow['isbn'] ?? $cleanRow['isbn13'] ?? $cleanRow['isbn10'] ?? $cleanRow['book_isbn'] ?? $cleanRow['bookisbn'] ?? null;
+        $isbnClean = $isbnRaw ? mb_substr(trim((string)$isbnRaw), 0, 30) : null;
 
         // 3. Flexible Author Detection
-        $author = $cleanRow['pengarang'] ?? $cleanRow['author'] ?? $cleanRow['authors'] ?? $cleanRow['book_author'] ?? $cleanRow['bookauthor'] ?? 'Penulis Referensi';
+        $authorRaw = $cleanRow['pengarang'] ?? $cleanRow['author'] ?? $cleanRow['authors'] ?? $cleanRow['book_author'] ?? $cleanRow['bookauthor'] ?? 'Penulis Referensi';
+        $authorClean = mb_substr(trim((string)$authorRaw), 0, 255);
+
+        // Deduplication Check: Skip if book with same ISBN or same Title+Author already exists
+        $existing = null;
+        if (!empty($isbnClean)) {
+            $existing = Book::where('isbn', $isbnClean)->first();
+        }
+        if (!$existing) {
+            $existing = Book::where('title', $titleClean)->where('author', $authorClean)->first();
+        }
+
+        if ($existing) {
+            // Already uploaded in previous batch, skip to prevent duplicates
+            return null;
+        }
 
         // 4. Flexible Publisher Detection
         $publisher = $cleanRow['penerbit'] ?? $cleanRow['publisher'] ?? 'Penerbit Umum';
@@ -58,11 +70,17 @@ class BooksImport implements ToModel, WithHeadingRow, WithLimit, WithChunkReadin
         if (empty($categoryName)) {
             $categoryName = 'Karya Umum & Komputer';
         }
+        $categoryName = mb_substr($categoryName, 0, 100);
 
-        $category = BookCategory::firstOrCreate(
-            ['name' => $categoryName],
-            ['code' => (string) rand(100, 999), 'description' => 'Kategori Referensi Import']
-        );
+        try {
+            $category = BookCategory::firstOrCreate(
+                ['name' => $categoryName],
+                ['code' => (string) rand(100, 999), 'description' => 'Kategori Referensi Import']
+            );
+        } catch (\Throwable $e) {
+            $category = BookCategory::first();
+            if (!$category) return null;
+        }
 
         $shelf = $cleanRow['rak'] ?? $cleanRow['shelf'] ?? 'Rak Referensi';
         $stock = (int) ($cleanRow['stok'] ?? $cleanRow['stock'] ?? 5);
@@ -71,20 +89,27 @@ class BooksImport implements ToModel, WithHeadingRow, WithLimit, WithChunkReadin
         $description = $cleanRow['deskripsi'] ?? $cleanRow['description'] ?? $cleanRow['abstract'] ?? $cleanRow['summary'] ?? null;
         $cover = $cleanRow['cover'] ?? $cleanRow['image_url_l'] ?? $cleanRow['image_url_m'] ?? $cleanRow['image_url_s'] ?? $cleanRow['thumbnail'] ?? $cleanRow['image'] ?? null;
 
-        $code = $cleanRow['kode_buku'] ?? $cleanRow['book_code'] ?? ('BK-' . sprintf('%04d', rand(1000, 9999)));
+        $existingCode = $cleanRow['kode_buku'] ?? $cleanRow['book_code'] ?? null;
+        $code = $existingCode
+            ? mb_substr(trim((string)$existingCode), 0, 50)
+            : ('BK-' . strtoupper(base_convert((int)(microtime(true) * 1000) + rand(1, 9999), 10, 36)));
+
+        if (Book::where('book_code', $code)->exists()) {
+            $code = 'BK-' . strtoupper(base_convert((int)(microtime(true) * 10000) + rand(1, 9999), 10, 36));
+        }
 
         return new Book([
-            'book_code'   => trim((string)$code),
-            'isbn'        => $isbn ? trim((string)$isbn) : null,
-            'title'       => trim((string)$title),
-            'author'      => trim((string)$author),
-            'publisher'   => trim((string)$publisher),
+            'book_code'   => $code,
+            'isbn'        => $isbnClean,
+            'title'       => $titleClean,
+            'author'      => $authorClean,
+            'publisher'   => mb_substr(trim((string)$publisher), 0, 255),
             'year'        => $year,
             'category_id' => $category->id,
-            'shelf'       => trim((string)$shelf),
+            'shelf'       => mb_substr(trim((string)$shelf), 0, 50),
             'stock'       => max(1, $stock),
-            'cover'       => $cover ? trim((string)$cover) : null,
-            'description' => $description ? trim((string)$description) : null,
+            'cover'       => $cover ? mb_substr(trim((string)$cover), 0, 500) : null,
+            'description' => $description ? mb_substr(trim((string)$description), 0, 3000) : null,
         ]);
     }
 }

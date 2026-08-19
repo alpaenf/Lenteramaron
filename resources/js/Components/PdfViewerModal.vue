@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue';
-import { X, ExternalLink, Download, Maximize2, Minimize2, BookOpen, FileText } from 'lucide-vue-next';
+import { X, ExternalLink, Download, Maximize2, Minimize2, BookOpen, FileText, Globe, AlertTriangle } from 'lucide-vue-next';
 
 const props = defineProps({
     show: Boolean,
@@ -17,12 +17,23 @@ const emit = defineEmits(['close']);
 
 const isFullscreen = ref(false);
 
+const isGoogleSearchUrl = computed(() => {
+    if (!props.pdfUrl) return false;
+    return props.pdfUrl.includes('google.com/search');
+});
+
+const isDirectPdfUrl = computed(() => {
+    if (!props.pdfUrl) return false;
+    const url = props.pdfUrl.trim().toLowerCase();
+    return url.startsWith('/') || url.startsWith('blob:') || url.endsWith('.pdf') || url.includes('.pdf?');
+});
+
 const embedUrl = computed(() => {
-    if (!props.pdfUrl) return '';
+    if (!props.pdfUrl || isGoogleSearchUrl.value) return '';
     const url = props.pdfUrl.trim();
     
-    // Local storage PDF or direct .pdf URL
-    if (url.startsWith('/') || url.startsWith('blob:') || url.endsWith('.pdf')) {
+    // Direct PDF files (local uploads or direct .pdf links)
+    if (isDirectPdfUrl.value) {
         return url;
     }
     
@@ -59,7 +70,7 @@ const close = () => {
                             {{ title || 'Pembaca Dokumen LITERA' }}
                         </h3>
                         <p class="text-xs text-slate-400 truncate mt-0.5 font-medium">
-                            {{ author ? 'Oleh: ' + author : 'Pembaca Digital Built-in' }}
+                            {{ author ? 'Penulis: ' + author : 'Pembaca Digital Built-in' }}
                         </p>
                     </div>
                 </div>
@@ -74,12 +85,12 @@ const close = () => {
                         class="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 border border-slate-700"
                     >
                         <ExternalLink class="w-4 h-4" />
-                        <span class="hidden sm:inline">Tab Baru</span>
+                        <span class="hidden sm:inline">Buka Tab Baru</span>
                     </a>
 
                     <!-- Download PDF -->
                     <a 
-                        v-if="pdfUrl" 
+                        v-if="pdfUrl && isDirectPdfUrl" 
                         :href="pdfUrl" 
                         download
                         target="_blank" 
@@ -87,7 +98,7 @@ const close = () => {
                         class="p-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-blue-500/20"
                     >
                         <Download class="w-4 h-4" />
-                        <span class="hidden sm:inline">Unduh</span>
+                        <span class="hidden sm:inline">Unduh PDF</span>
                     </a>
 
                     <!-- Fullscreen Toggle -->
@@ -110,20 +121,52 @@ const close = () => {
                 </div>
             </div>
 
-            <!-- PDF Viewer Iframe Body -->
-            <div class="relative flex-1 bg-slate-950 overflow-hidden flex items-center justify-center">
+            <!-- Main Reader Content Area -->
+            <div class="relative flex-1 bg-slate-950 overflow-hidden flex items-center justify-center p-4">
+                <!-- Case A: Valid PDF Embed -->
                 <iframe 
-                    v-if="pdfUrl"
+                    v-if="pdfUrl && !isGoogleSearchUrl"
                     :src="embedUrl" 
-                    class="w-full h-full border-0 bg-slate-950" 
+                    class="w-full h-full border-0 bg-slate-950 rounded-xl" 
                     title="PDF Reader"
                     allowfullscreen
                 ></iframe>
 
-                <div v-else class="text-center p-8 text-slate-400 max-w-sm space-y-3">
-                    <FileText class="w-12 h-12 mx-auto opacity-40 text-blue-400" />
-                    <p class="font-bold text-sm text-slate-200">Berkas PDF Tidak Tersedia</p>
-                    <p class="text-xs leading-relaxed">Pratinjau digital tidak tersedia secara langsung untuk sumber ini.</p>
+                <!-- Case B: Non-PDF or External Web Search Link Fallback Card -->
+                <div v-else class="text-center p-8 max-w-md w-full bg-slate-900/90 rounded-3xl border border-slate-800 shadow-2xl space-y-5 animate-in fade-in duration-300">
+                    <div class="w-16 h-16 rounded-2xl bg-blue-600/10 text-blue-400 flex items-center justify-center mx-auto border border-blue-500/20">
+                        <BookOpen class="w-8 h-8" />
+                    </div>
+
+                    <div class="space-y-2">
+                        <span class="inline-block px-3 py-1 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-full text-xs font-bold">
+                            Koleksi Referensi Buku Fisik
+                        </span>
+                        <h4 class="font-extrabold text-base text-slate-100 leading-snug">{{ title }}</h4>
+                        <p class="text-xs text-slate-400">Oleh: {{ author || '-' }}</p>
+                    </div>
+
+                    <p class="text-xs text-slate-400 leading-relaxed bg-slate-950/60 p-4 rounded-2xl border border-slate-800/80 italic">
+                        Buku ini belum memiliki berkas E-Book PDF digital terlampir. Anda dapat membaca fisik buku ini di rak perpustakaan atau menelusuri pustaka ilmiah eksternal di tab baru.
+                    </p>
+
+                    <div class="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
+                        <a 
+                            v-if="pdfUrl"
+                            :href="pdfUrl" 
+                            target="_blank" 
+                            class="w-full sm:w-auto px-6 py-3 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-xs shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2 transition"
+                        >
+                            <Globe class="w-4 h-4" />
+                            <span>Telusuri Sumber Web di Tab Baru</span>
+                        </a>
+                        <button 
+                            @click="close"
+                            class="w-full sm:w-auto px-5 py-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs border border-slate-700 transition"
+                        >
+                            Tutup
+                        </button>
+                    </div>
                 </div>
             </div>
 

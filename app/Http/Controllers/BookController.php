@@ -21,6 +21,10 @@ class BookController extends Controller
     {
         $search = $request->input('search');
         $categoryId = $request->input('category_id');
+        $perPage = (int) $request->input('per_page', 15);
+        if ($perPage < 5 || $perPage > 200) {
+            $perPage = 15;
+        }
 
         $query = Book::with('category');
 
@@ -37,7 +41,7 @@ class BookController extends Controller
             $query->where('category_id', $categoryId);
         }
 
-        $books = $query->latest()->paginate(10)->withQueryString();
+        $books = $query->latest()->paginate($perPage)->withQueryString();
         $categories = BookCategory::all();
 
         return Inertia::render('Books/Index', [
@@ -46,7 +50,9 @@ class BookController extends Controller
             'filters' => [
                 'search' => $search,
                 'category_id' => $categoryId,
+                'per_page' => $perPage,
             ],
+            'total_books' => Book::count(),
         ]);
     }
 
@@ -201,7 +207,7 @@ class BookController extends Controller
     public function batchImportJson(Request $request)
     {
         $request->validate([
-            'rows' => 'required|array|min:1|max:5000',
+            'rows' => 'required|array|min:1|max:25000',
         ]);
 
         $rows = $request->input('rows');
@@ -220,8 +226,26 @@ class BookController extends Controller
             $title = $cleanRow['judul_buku'] ?? $cleanRow['judul'] ?? $cleanRow['title'] ?? $cleanRow['book_title'] ?? $cleanRow['booktitle'] ?? null;
             if (empty($title)) { $skippedCount++; continue; }
 
-            $isbn = $cleanRow['isbn'] ?? $cleanRow['isbn13'] ?? $cleanRow['isbn10'] ?? $cleanRow['book_isbn'] ?? null;
-            $author = $cleanRow['pengarang'] ?? $cleanRow['author'] ?? $cleanRow['authors'] ?? $cleanRow['book_author'] ?? 'Penulis Referensi';
+            $titleClean = mb_substr(trim((string)$title), 0, 255);
+            $isbnRaw = $cleanRow['isbn'] ?? $cleanRow['isbn13'] ?? $cleanRow['isbn10'] ?? $cleanRow['book_isbn'] ?? null;
+            $isbnClean = $isbnRaw ? mb_substr(trim((string)$isbnRaw), 0, 30) : null;
+            $authorRaw = $cleanRow['pengarang'] ?? $cleanRow['author'] ?? $cleanRow['authors'] ?? $cleanRow['book_author'] ?? 'Penulis Referensi';
+            $authorClean = mb_substr(trim((string)$authorRaw), 0, 255);
+
+            // Deduplication Check: Skip existing records
+            $isDuplicate = false;
+            if (!empty($isbnClean)) {
+                $isDuplicate = Book::where('isbn', $isbnClean)->exists();
+            }
+            if (!$isDuplicate) {
+                $isDuplicate = Book::where('title', $titleClean)->where('author', $authorClean)->exists();
+            }
+
+            if ($isDuplicate) {
+                $skippedCount++;
+                continue;
+            }
+
             $publisher = $cleanRow['penerbit'] ?? $cleanRow['publisher'] ?? 'Penerbit Umum';
 
             $yearRaw = $cleanRow['tahun'] ?? $cleanRow['year'] ?? $cleanRow['published_year'] ?? $cleanRow['publishedyear'] ?? $cleanRow['year_of_publication'] ?? date('Y');
@@ -262,9 +286,9 @@ class BookController extends Controller
             try {
                 Book::create([
                     'book_code'   => mb_substr($code, 0, 50),
-                    'isbn'        => $isbn ? mb_substr(trim((string)$isbn), 0, 30) : null,
-                    'title'       => mb_substr(trim((string)$title), 0, 255),
-                    'author'      => mb_substr(trim((string)$author), 0, 255),
+                    'isbn'        => $isbnClean,
+                    'title'       => $titleClean,
+                    'author'      => $authorClean,
                     'publisher'   => mb_substr(trim((string)$publisher), 0, 255),
                     'year'        => $year,
                     'category_id' => $category->id,
@@ -282,7 +306,7 @@ class BookController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => "Berhasil mengimpor {$importedCount} buku ke katalog referensi." . ($skippedCount > 0 ? " ({$skippedCount} baris dilewati karena duplikat/kosong)" : ''),
+            'message' => "Berhasil mengimpor {$importedCount} buku baru ke katalog referensi." . ($skippedCount > 0 ? " ({$skippedCount} baris dilewati karena duplikat/sudah ada di database)" : ''),
         ]);
     }
 }

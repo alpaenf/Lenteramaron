@@ -24,6 +24,7 @@ const props = defineProps({
     books: Object,
     categories: Array,
     filters: Object,
+    total_books: Number,
 });
 
 const page = usePage();
@@ -48,7 +49,7 @@ const openPdfReaderFromBook = (book) => {
     if (!book) return;
     const title = book.title || 'Katalog Buku';
     const author = book.author || '';
-    const pdfUrl = book.file_path || book.pdf_url || `https://www.google.com/search?q=${encodeURIComponent(book.title + ' ' + book.author)}`;
+    const pdfUrl = book.file_path || book.pdf_url || null;
     
     pdfReaderData.value = { title, author, pdfUrl, sourceType: 'local' };
     isReadModalOpen.value = false;
@@ -89,11 +90,13 @@ const handleIsbnEnrich = async () => {
 
 const search = ref(props.filters.search || '');
 const categoryId = ref(props.filters.category_id || '');
+const perPage = ref(props.filters.per_page || 15);
 
 const filter = () => {
     router.get('/books', {
         search: search.value,
         category_id: categoryId.value,
+        per_page: perPage.value,
     }, { preserveState: true, replace: true });
 };
 
@@ -449,7 +452,12 @@ const submitBatchIsbn = async () => {
             <!-- Top Header & Action Buttons -->
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Master Data Buku</h1>
+                    <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
+                        <span>Master Data Buku</span>
+                        <span v-if="books?.total || total_books" class="px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 text-xs font-bold border border-blue-200">
+                            {{ (books?.total || total_books || 0).toLocaleString('id-ID') }} Buku
+                        </span>
+                    </h1>
                     <p class="text-xs text-slate-500 mt-1">Kelola katalog koleksi buku, stok exemplar, dan lokasi rak penyimpanan.</p>
                 </div>
                 <div v-if="isAdmin" class="flex flex-wrap items-center gap-2 sm:gap-2.5">
@@ -578,6 +586,38 @@ const submitBatchIsbn = async () => {
                             </tr>
                         </tbody>
                     </table>
+                </div>
+
+                <!-- Pagination Footer -->
+                <div v-if="books.links && books.links.length > 3" class="p-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div class="flex flex-wrap items-center gap-3">
+                        <p class="text-xs text-slate-500 font-medium">
+                            Menampilkan {{ books.from || 0 }} - {{ books.to || 0 }} dari {{ books.total || 0 }} buku
+                        </p>
+                        <span class="text-slate-300 hidden sm:inline">|</span>
+                        <div class="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
+                            <span>Tampilkan:</span>
+                            <select v-model="perPage" @change="filter" class="py-1 px-2 text-xs border border-slate-200 rounded-lg bg-slate-50 font-bold text-slate-700">
+                                <option :value="15">15 per halaman</option>
+                                <option :value="25">25 per halaman</option>
+                                <option :value="50">50 per halaman</option>
+                                <option :value="100">100 per halaman</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-1 flex-wrap justify-center">
+                        <component 
+                            v-for="(link, i) in books.links" 
+                            :key="i"
+                            :is="link.url ? 'Link' : 'span'"
+                            :href="link.url"
+                            v-html="link.label"
+                            :class="[
+                                'px-3 py-1.5 rounded-lg text-xs font-bold transition',
+                                link.active ? 'bg-blue-600 text-white' : link.url ? 'text-slate-600 hover:bg-slate-100' : 'text-slate-300 pointer-events-none'
+                            ]"
+                        />
+                    </div>
                 </div>
             </div>
 
