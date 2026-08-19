@@ -7,6 +7,7 @@ use App\Models\SearchQuery;
 use App\Services\Academic\AcademicAggregatorService;
 use App\Services\GroqService;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 
 class HybridSearchService
 {
@@ -34,66 +35,71 @@ class HybridSearchService
             ];
         }
 
-        // 1. Groq Query Expansion & Understanding
-        $expanded = $this->groqService->expandQuery($query);
+        $cacheKey = 'litera_search_' . md5(strtolower($query) . '_' . json_encode($filters));
 
-        // 2. Fetch Local Library Books
-        $localItems = $this->searchLocalBooks($query, $expanded);
+        $result = Cache::remember($cacheKey, now()->addHours(24), function () use ($query, $filters) {
+            // 1. Groq Query Expansion & Understanding
+            $expanded = $this->groqService->expandQuery($query);
 
-        // 3. Fetch External Academic Sources
-        $externalItems = $this->searchExternalSources($query, $expanded);
+            // 2. Fetch Local Library Books
+            $localItems = $this->searchLocalBooks($query, $expanded);
 
-        // 4. Merge, Score, and Rank All Items
-        $allScoredItems = $this->scoreAndRankItems($query, $expanded, $localItems, $externalItems);
+            // 3. Fetch External Academic Sources
+            $externalItems = $this->searchExternalSources($query, $expanded);
 
-        // Filter by source_type filter if specified
-        if (!empty($filters['source_type'])) {
-            if ($filters['source_type'] === 'local') {
-                $allScoredItems = array_values(array_filter($allScoredItems, fn($i) => $i['source_type'] === 'local'));
-            } elseif ($filters['source_type'] === 'external') {
-                $allScoredItems = array_values(array_filter($allScoredItems, fn($i) => $i['source_type'] === 'external'));
+            // 4. Merge, Score, and Rank All Items
+            $allScoredItems = $this->scoreAndRankItems($query, $expanded, $localItems, $externalItems);
+
+            // Filter by source_type filter if specified
+            if (!empty($filters['source_type'])) {
+                if ($filters['source_type'] === 'local') {
+                    $allScoredItems = array_values(array_filter($allScoredItems, fn($i) => $i['source_type'] === 'local'));
+                } elseif ($filters['source_type'] === 'external') {
+                    $allScoredItems = array_values(array_filter($allScoredItems, fn($i) => $i['source_type'] === 'external'));
+                }
             }
-        }
 
-        // Filter by year_range filter if specified
-        if (!empty($filters['year_range']) && $filters['year_range'] !== 'all') {
-            $currentYear = (int) date('Y');
-            $minYear = match ($filters['year_range']) {
-                '3_years'  => $currentYear - 3,
-                '5_years'  => $currentYear - 5,
-                '10_years' => $currentYear - 10,
-                default    => 0,
-            };
+            // Filter by year_range filter if specified
+            if (!empty($filters['year_range']) && $filters['year_range'] !== 'all') {
+                $currentYear = (int) date('Y');
+                $minYear = match ($filters['year_range']) {
+                    '3_years'  => $currentYear - 3,
+                    '5_years'  => $currentYear - 5,
+                    '10_years' => $currentYear - 10,
+                    default    => 0,
+                };
 
-            if ($minYear > 0) {
-                $allScoredItems = array_values(array_filter($allScoredItems, function ($item) use ($minYear) {
-                    $year = (int) ($item['publication_year'] ?? 0);
-                    // If year is unknown/0 or >= minYear, retain item
-                    return $year === 0 || $year >= $minYear;
-                }));
+                if ($minYear > 0) {
+                    $allScoredItems = array_values(array_filter($allScoredItems, function ($item) use ($minYear) {
+                        $year = (int) ($item['publication_year'] ?? 0);
+                        return $year === 0 || $year >= $minYear;
+                    }));
+                }
             }
-        }
 
-        // Log search query
+            return [
+                'query'         => $query,
+                'intent'        => $expanded['intent'] ?? null,
+                'main_topic'    => $expanded['main_topic'] ?? $query,
+                'total_results' => count($allScoredItems),
+                'items'         => $allScoredItems,
+            ];
+        });
+
+        // Log search query for analytics
         try {
             SearchQuery::create([
                 'user_id'          => Auth::id(),
                 'query_text'       => $query,
                 'normalized_query' => strtolower($query),
                 'filters'          => $filters,
-                'results_count'    => count($allScoredItems),
+                'results_count'    => $result['total_results'] ?? 0,
             ]);
         } catch (\Throwable $e) {
             // Ignore log error
         }
 
-        return [
-            'query'         => $query,
-            'intent'        => $expanded['intent'] ?? null,
-            'main_topic'    => $expanded['main_topic'] ?? $query,
-            'total_results' => count($allScoredItems),
-            'items'         => $allScoredItems,
-        ];
+        return $result;
     }
 
     protected function searchLocalBooks(string $query, array $expanded): array

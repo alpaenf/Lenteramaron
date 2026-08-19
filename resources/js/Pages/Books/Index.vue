@@ -39,6 +39,22 @@ const enrichStatus = ref('');
 const selectedReadBook = ref(null);
 const isReadModalOpen = ref(false);
 
+import PdfViewerModal from '@/Components/PdfViewerModal.vue';
+
+const isPdfReaderOpen = ref(false);
+const pdfReaderData = ref({ title: '', author: '', pdfUrl: '', sourceType: 'local' });
+
+const openPdfReaderFromBook = (book) => {
+    if (!book) return;
+    const title = book.title || 'Katalog Buku';
+    const author = book.author || '';
+    const pdfUrl = book.file_path || book.pdf_url || `https://www.google.com/search?q=${encodeURIComponent(book.title + ' ' + book.author)}`;
+    
+    pdfReaderData.value = { title, author, pdfUrl, sourceType: 'local' };
+    isReadModalOpen.value = false;
+    isPdfReaderOpen.value = true;
+};
+
 const openReadModal = (book) => {
     selectedReadBook.value = book;
     isReadModalOpen.value = true;
@@ -881,17 +897,26 @@ const submitBatchIsbn = async () => {
 
                     <div class="pt-2 flex flex-col sm:flex-row items-center justify-end gap-3 border-t border-slate-100">
                         <button type="button" @click="isReadModalOpen = false" class="w-full sm:w-auto px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-bold text-xs">Tutup</button>
-                        <a 
-                            :href="`https://www.google.com/search?q=${encodeURIComponent(selectedReadBook.title + ' ' + selectedReadBook.author)}`" 
-                            target="_blank" 
+                        <button 
+                            @click="openPdfReaderFromBook(selectedReadBook)" 
                             class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs shadow-md shadow-blue-500/20 flex items-center justify-center gap-2"
                         >
                             <BookOpen class="w-4 h-4" />
-                            <span>Buka / Baca Sumber Digital</span>
-                        </a>
+                            <span>Baca via PDF Reader Built-in</span>
+                        </button>
                     </div>
                 </div>
             </div>
+
+            <!-- In-App PDF Reader Modal Component -->
+            <PdfViewerModal
+                :show="isPdfReaderOpen"
+                :title="pdfReaderData.title"
+                :author="pdfReaderData.author"
+                :pdfUrl="pdfReaderData.pdfUrl"
+                :sourceType="pdfReaderData.sourceType"
+                @close="isPdfReaderOpen = false"
+            />
         </div>
     </AuthenticatedLayout>
 </template>

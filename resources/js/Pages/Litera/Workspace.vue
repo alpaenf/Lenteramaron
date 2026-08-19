@@ -15,6 +15,20 @@ import {
     Trash2, 
     FileText 
 } from 'lucide-vue-next';
+import PdfViewerModal from '@/Components/PdfViewerModal.vue';
+
+const isPdfReaderOpen = ref(false);
+const pdfReaderItem = ref({ title: '', author: '', pdfUrl: '', sourceType: 'external' });
+
+const openPdfReader = (item) => {
+    const title = item.book?.title || item.external_source?.title || 'Dokumen Riset';
+    const author = item.book?.author || (item.external_source?.authors || []).join(', ') || '';
+    const pdfUrl = item.external_source?.pdf_url || item.external_source?.url || item.book?.file_path || '';
+    const sourceType = item.source_type || 'external';
+
+    pdfReaderItem.value = { title, author, pdfUrl, sourceType };
+    isPdfReaderOpen.value = true;
+};
 
 const props = defineProps({
     topics: {
@@ -264,6 +278,15 @@ const filteredSavedSources = computed(() => {
                             </button>
 
                             <div class="flex items-center gap-2">
+                                <button
+                                    v-if="item.external_source?.pdf_url || item.external_source?.url || item.book?.file_path"
+                                    @click="openPdfReader(item)"
+                                    class="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold flex items-center gap-1 shadow-xs transition"
+                                >
+                                    <BookOpen class="w-3.5 h-3.5" />
+                                    <span>Baca PDF</span>
+                                </button>
+
                                 <a
                                     v-if="item.external_source?.url || item.external_source?.pdf_url"
                                     :href="item.external_source.pdf_url || item.external_source.url"
@@ -395,6 +418,16 @@ const filteredSavedSources = computed(() => {
                 </form>
             </div>
         </div>
+
+        <!-- Embedded In-App PDF Reader Modal -->
+        <PdfViewerModal
+            :show="isPdfReaderOpen"
+            :title="pdfReaderItem.title"
+            :author="pdfReaderItem.author"
+            :pdfUrl="pdfReaderItem.pdfUrl"
+            :sourceType="pdfReaderItem.sourceType"
+            @close="isPdfReaderOpen = false"
+        />
 
     </AuthenticatedLayout>
 </template>
