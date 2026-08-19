@@ -452,27 +452,36 @@ const submitBatchIsbn = async () => {
                     <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Master Data Buku</h1>
                     <p class="text-xs text-slate-500 mt-1">Kelola katalog koleksi buku, stok exemplar, dan lokasi rak penyimpanan.</p>
                 </div>
-                <div v-if="isAdmin" class="flex flex-wrap items-center gap-3">
-                    <button @click="isWebSearchOpen = true" class="px-4 py-2.5 rounded-xl border border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100 text-xs font-extrabold transition-all flex items-center gap-2">
-                        <Sparkles class="w-4 h-4 text-amber-500" />
+                <div v-if="isAdmin" class="flex flex-wrap items-center gap-2 sm:gap-2.5">
+                    <!-- Primary CTA -->
+                    <button @click="openCreateModal" class="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-extrabold transition-all shadow-md shadow-blue-500/20 flex items-center gap-2">
+                        <Plus class="w-4 h-4" />
+                        <span>Tambah Buku</span>
+                    </button>
+
+                    <!-- Smart Web & ISBN Import -->
+                    <button @click="isWebSearchOpen = true" class="px-3.5 py-2.5 rounded-xl border border-blue-200 bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold transition-all flex items-center gap-1.5">
+                        <Sparkles class="w-4 h-4 text-amber-500 shrink-0" />
                         <span>Cari &amp; Tambah dari Web</span>
                     </button>
-                    <button @click="isBatchIsbnOpen = true" class="px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 text-xs font-bold transition-all flex items-center gap-2">
-                        <BookMarked class="w-4 h-4 text-blue-600" />
-                        <span>Import Batch ISBN</span>
+
+                    <button @click="isBatchIsbnOpen = true" class="px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold transition-all flex items-center gap-1.5 shadow-2xs">
+                        <BookMarked class="w-4 h-4 text-blue-600 shrink-0" />
+                        <span>Batch ISBN</span>
                     </button>
-                    <a href="/books/export-excel" target="_blank" class="px-4 py-2.5 rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 text-xs font-bold transition-all flex items-center gap-2">
-                        <FileSpreadsheet class="w-4 h-4" />
-                        <span>Export Excel</span>
-                    </a>
-                    <button @click="isImportOpen = true" class="px-4 py-2.5 rounded-xl border border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100 text-xs font-bold transition-all flex items-center gap-2">
-                        <Upload class="w-4 h-4" />
-                        <span>Import Excel</span>
-                    </button>
-                    <button @click="openCreateModal" class="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-all shadow-md shadow-blue-500/20 flex items-center gap-2">
-                        <Plus class="w-4 h-4" />
-                        <span>Tambah Manual</span>
-                    </button>
+
+                    <!-- Excel Tools Segmented Group -->
+                    <div class="inline-flex rounded-xl border border-slate-200 bg-white p-0.5 shadow-2xs items-center">
+                        <button @click="isImportOpen = true" class="px-3 py-1.5 text-slate-700 hover:text-blue-600 hover:bg-slate-50 rounded-lg text-xs font-bold transition flex items-center gap-1.5">
+                            <Upload class="w-3.5 h-3.5 text-blue-600" />
+                            <span>Import Excel</span>
+                        </button>
+                        <div class="w-px h-4 bg-slate-200"></div>
+                        <a href="/books/export-excel" target="_blank" class="px-3 py-1.5 text-slate-700 hover:text-emerald-600 hover:bg-slate-50 rounded-lg text-xs font-bold transition flex items-center gap-1.5">
+                            <FileSpreadsheet class="w-3.5 h-3.5 text-emerald-600" />
+                            <span>Export Excel</span>
+                        </a>
+                    </div>
                 </div>
             </div>
 
