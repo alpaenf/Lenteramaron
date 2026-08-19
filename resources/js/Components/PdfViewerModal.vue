@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue';
-import { X, ExternalLink, Download, Maximize2, Minimize2, BookOpen, FileText, Globe, AlertTriangle } from 'lucide-vue-next';
+import { X, ExternalLink, Download, Maximize2, Minimize2, BookOpen, FileText, Globe } from 'lucide-vue-next';
 
 const props = defineProps({
     show: Boolean,
@@ -52,24 +52,24 @@ const close = () => {
 </script>
 
 <template>
-    <div v-if="show" class="fixed inset-0 z-[100] bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 animate-in fade-in duration-200">
+    <div v-if="show" class="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 animate-in fade-in duration-200">
         <div 
             :class="[
-                'bg-slate-900 text-white rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-slate-800 transition-all duration-300',
+                'bg-white text-slate-900 rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-slate-200/80 transition-all duration-300',
                 isFullscreen ? 'fixed inset-2 z-[110] rounded-2xl' : 'w-full max-w-5xl h-[88vh]'
             ]"
         >
             <!-- Header Bar -->
-            <div class="px-6 py-4 bg-slate-900/90 border-b border-slate-800 flex items-center justify-between gap-4 shrink-0">
+            <div class="px-6 py-4 bg-white border-b border-slate-100 flex items-center justify-between gap-4 shrink-0">
                 <div class="flex items-center gap-3 min-w-0">
-                    <div class="p-2.5 bg-blue-600/20 text-blue-400 rounded-xl border border-blue-500/20 shrink-0">
+                    <div class="p-2.5 bg-blue-50 text-blue-600 rounded-xl border border-blue-200/60 shrink-0">
                         <BookOpen class="w-5 h-5" />
                     </div>
                     <div class="min-w-0">
-                        <h3 class="font-bold text-sm sm:text-base text-slate-100 truncate leading-tight">
+                        <h3 class="font-extrabold text-sm sm:text-base text-slate-900 truncate leading-tight">
                             {{ title || 'Pembaca Dokumen LITERA' }}
                         </h3>
-                        <p class="text-xs text-slate-400 truncate mt-0.5 font-medium">
+                        <p class="text-xs text-slate-500 truncate mt-0.5 font-medium">
                             {{ author ? 'Penulis: ' + author : 'Pembaca Digital Built-in' }}
                         </p>
                     </div>
@@ -82,7 +82,7 @@ const close = () => {
                         :href="pdfUrl" 
                         target="_blank" 
                         title="Buka di Tab Baru" 
-                        class="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 border border-slate-700"
+                        class="p-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition flex items-center gap-1.5 border border-slate-200"
                     >
                         <ExternalLink class="w-4 h-4" />
                         <span class="hidden sm:inline">Buka Tab Baru</span>
@@ -95,7 +95,7 @@ const close = () => {
                         download
                         target="_blank" 
                         title="Unduh Berkas PDF" 
-                        class="p-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-blue-500/20"
+                        class="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-blue-500/20"
                     >
                         <Download class="w-4 h-4" />
                         <span class="hidden sm:inline">Unduh PDF</span>
@@ -105,7 +105,7 @@ const close = () => {
                     <button 
                         @click="toggleFullscreen" 
                         title="Toggle Layar Penuh" 
-                        class="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl transition border border-slate-700"
+                        class="p-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition border border-slate-200"
                     >
                         <component :is="isFullscreen ? Minimize2 : Maximize2" class="w-4 h-4" />
                     </button>
@@ -114,7 +114,7 @@ const close = () => {
                     <button 
                         @click="close" 
                         title="Tutup Pembaca" 
-                        class="p-2 bg-rose-500/10 hover:bg-rose-500 text-rose-400 hover:text-white rounded-xl transition border border-rose-500/20 ml-1"
+                        class="p-2 bg-rose-50 hover:bg-rose-500 text-rose-600 hover:text-white rounded-xl transition border border-rose-200 ml-1"
                     >
                         <X class="w-5 h-5" />
                     </button>
@@ -122,31 +122,31 @@ const close = () => {
             </div>
 
             <!-- Main Reader Content Area -->
-            <div class="relative flex-1 bg-slate-950 overflow-hidden flex items-center justify-center p-4">
+            <div class="relative flex-1 bg-slate-100/70 overflow-hidden flex items-center justify-center p-4">
                 <!-- Case A: Valid PDF Embed -->
                 <iframe 
                     v-if="pdfUrl && !isGoogleSearchUrl"
                     :src="embedUrl" 
-                    class="w-full h-full border-0 bg-slate-950 rounded-xl" 
+                    class="w-full h-full border-0 bg-white rounded-xl shadow-xs" 
                     title="PDF Reader"
                     allowfullscreen
                 ></iframe>
 
                 <!-- Case B: Non-PDF or External Web Search Link Fallback Card -->
-                <div v-else class="text-center p-8 max-w-md w-full bg-slate-900/90 rounded-3xl border border-slate-800 shadow-2xl space-y-5 animate-in fade-in duration-300">
-                    <div class="w-16 h-16 rounded-2xl bg-blue-600/10 text-blue-400 flex items-center justify-center mx-auto border border-blue-500/20">
+                <div v-else class="text-center p-8 max-w-md w-full bg-white rounded-3xl border border-slate-200/80 shadow-xl space-y-5 animate-in fade-in duration-300">
+                    <div class="w-16 h-16 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mx-auto border border-blue-200/60">
                         <BookOpen class="w-8 h-8" />
                     </div>
 
                     <div class="space-y-2">
-                        <span class="inline-block px-3 py-1 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-full text-xs font-bold">
+                        <span class="inline-block px-3 py-1 bg-amber-50 text-amber-700 border border-amber-200 rounded-full text-xs font-bold">
                             Koleksi Referensi Buku Fisik
                         </span>
-                        <h4 class="font-extrabold text-base text-slate-100 leading-snug">{{ title }}</h4>
-                        <p class="text-xs text-slate-400">Oleh: {{ author || '-' }}</p>
+                        <h4 class="font-extrabold text-base text-slate-900 leading-snug">{{ title }}</h4>
+                        <p class="text-xs text-slate-500 font-medium">Oleh: {{ author || '-' }}</p>
                     </div>
 
-                    <p class="text-xs text-slate-400 leading-relaxed bg-slate-950/60 p-4 rounded-2xl border border-slate-800/80 italic">
+                    <p class="text-xs text-slate-600 leading-relaxed bg-slate-50 p-4 rounded-2xl border border-slate-200/60 italic">
                         Buku ini belum memiliki berkas E-Book PDF digital terlampir. Anda dapat membaca fisik buku ini di rak perpustakaan atau menelusuri pustaka ilmiah eksternal di tab baru.
                     </p>
 
@@ -155,14 +155,14 @@ const close = () => {
                             v-if="pdfUrl"
                             :href="pdfUrl" 
                             target="_blank" 
-                            class="w-full sm:w-auto px-6 py-3 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-xs shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2 transition"
+                            class="w-full sm:w-auto px-6 py-3 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2 transition"
                         >
                             <Globe class="w-4 h-4" />
                             <span>Telusuri Sumber Web di Tab Baru</span>
                         </a>
                         <button 
                             @click="close"
-                            class="w-full sm:w-auto px-5 py-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs border border-slate-700 transition"
+                            class="w-full sm:w-auto px-5 py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs border border-slate-200 transition"
                         >
                             Tutup
                         </button>
@@ -171,12 +171,12 @@ const close = () => {
             </div>
 
             <!-- Footer Bar -->
-            <div class="px-6 py-2.5 bg-slate-900/90 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400 shrink-0">
+            <div class="px-6 py-2.5 bg-white border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500 shrink-0">
                 <div class="flex items-center gap-2">
-                    <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                    <span>LITERA Built-in PDF Reader Engine</span>
+                    <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span class="font-medium">LITERA Built-in PDF Reader Engine</span>
                 </div>
-                <span>Tekan <kbd class="px-1.5 py-0.5 bg-slate-800 border border-slate-700 rounded text-[10px] text-slate-300">ESC</kbd> atau tombol Tutup untuk kembali</span>
+                <span>Tekan <kbd class="px-1.5 py-0.5 bg-slate-100 border border-slate-200 rounded text-[10px] text-slate-600 font-mono">ESC</kbd> atau tombol Tutup untuk kembali</span>
             </div>
         </div>
     </div>
